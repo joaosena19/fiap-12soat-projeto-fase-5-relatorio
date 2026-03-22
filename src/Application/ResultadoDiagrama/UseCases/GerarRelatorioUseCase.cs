@@ -12,7 +12,7 @@ namespace Application.ResultadoDiagrama.UseCases;
 /// </summary>
 public class GerarRelatorioUseCase
 {
-    public async Task ExecutarAsync(Guid analiseDiagramaId, TipoRelatorioEnum tipoRelatorio, IResultadoDiagramaGateway gateway, IRelatorioStrategyResolver strategyResolver, IAppLogger logger)
+    public async Task ExecutarAsync(Guid analiseDiagramaId, TipoRelatorioEnum tipoRelatorio, IResultadoDiagramaGateway gateway, IRelatorioStrategyResolver strategyResolver, IMetricsService metrics, IAppLogger logger)
     {
         logger.ComUseCase(this).LogInformation($"Iniciando geração de relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", tipoRelatorio, analiseDiagramaId);
 
@@ -25,7 +25,10 @@ public class GerarRelatorioUseCase
 
         var relatorio = resultadoDiagrama.ObterRelatorio(tipoRelatorio);
         if (!relatorio.PodeGerar())
+        {
+            logger.ComUseCase(this).LogDebug($"Relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}} não pode ser gerado (estado atual não permite)", tipoRelatorio, analiseDiagramaId);
             return;
+        }
 
         if (!resultadoDiagrama.AnaliseDisponivel())
         {
@@ -44,6 +47,7 @@ public class GerarRelatorioUseCase
             resultadoDiagrama.ConcluirRelatorio(tipoRelatorio, conteudo);
             await gateway.SalvarAsync(resultadoDiagrama);
 
+            metrics.RegistrarRelatorioGerado(analiseDiagramaId, tipoRelatorio);
             logger.ComUseCase(this).LogInformation($"Relatório {{{LogNomesPropriedades.TipoRelatorio}}} gerado com sucesso para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", tipoRelatorio, analiseDiagramaId);
         }
         catch (Exception ex)
@@ -51,6 +55,7 @@ public class GerarRelatorioUseCase
             resultadoDiagrama.RegistrarFalhaRelatorio(tipoRelatorio, ex.Message);
             await gateway.SalvarAsync(resultadoDiagrama);
 
+            metrics.RegistrarRelatorioComFalha(analiseDiagramaId, tipoRelatorio, ex.Message);
             logger.ComUseCase(this).LogError(ex, $"Erro ao gerar relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", tipoRelatorio, analiseDiagramaId);
         }
     }

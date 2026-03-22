@@ -1,6 +1,7 @@
 using Application.Contracts.Gateways;
 using Application.Contracts.Messaging.Dtos;
 using Application.Contracts.Monitoramento;
+using Application.Extensions;
 using Infrastructure.Monitoramento;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,20 +28,30 @@ public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiag
     {
         var mensagem = context.Message;
         var logger = new LoggerAdapter<ProcessamentoDiagramaIniciadoConsumer>(_loggerFactory.CreateLogger<ProcessamentoDiagramaIniciadoConsumer>());
-        var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
-        var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
 
-        logger.LogInformation($"Recebida mensagem de processamento iniciado para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
+        try
+        {
+            var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
+            var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
+            var messageId = context.MessageId?.ToString() ?? "desconhecido";
 
-        var resultadoExistente = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de processamento iniciado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
 
-        var resultadoDiagrama = resultadoExistente ?? Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
-        resultadoDiagrama.MarcarEmProcessamento();
+            var resultadoExistente = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
 
-        await gateway.SalvarAsync(resultadoDiagrama);
+            var resultadoDiagrama = resultadoExistente ?? Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
+            resultadoDiagrama.MarcarEmProcessamento();
 
-        metrics.RegistrarAnaliseRecebida(mensagem.AnaliseDiagramaId, mensagem.Extensao);
+            await gateway.SalvarAsync(resultadoDiagrama);
 
-        logger.LogInformation($"Resultado de diagrama atualizado para EmProcessamento em {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
+            metrics.RegistrarAnaliseRecebida(mensagem.AnaliseDiagramaId, mensagem.Extensao);
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogInformation($"Resultado de diagrama atualizado para EmProcessamento em {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
+        }
+        catch (Exception ex)
+        {
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogError(ex, "Erro ao consumir mensagem de processamento iniciado");
+            throw;
+        }
     }
 }

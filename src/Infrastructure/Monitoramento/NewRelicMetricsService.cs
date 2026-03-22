@@ -1,5 +1,7 @@
 using Application.Contracts.Monitoramento;
+using Domain.AnaliseDiagrama.Enums;
 using Shared.Constants;
+using Infrastructure.Monitoramento.Correlation;
 using NR = NewRelic.Api.Agent;
 
 namespace Infrastructure.Monitoramento;
@@ -17,6 +19,9 @@ public class NewRelicMetricsService : IMetricsService
             { LogNomesPropriedades.Extensao, extensao },
             { LogNomesPropriedades.Timestamp, DateTimeOffset.UtcNow }
         };
+
+        AdicionarCorrelationId(atributos);
+
         NR.NewRelic.RecordCustomEvent("AnaliseDiagramaRecebida", atributos);
     }
 
@@ -27,6 +32,9 @@ public class NewRelicMetricsService : IMetricsService
             { LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId },
             { LogNomesPropriedades.Timestamp, DateTimeOffset.UtcNow }
         };
+
+        AdicionarCorrelationId(atributos);
+
         NR.NewRelic.RecordCustomEvent("AnaliseDiagramaConcluida", atributos);
     }
 
@@ -38,6 +46,45 @@ public class NewRelicMetricsService : IMetricsService
             { LogNomesPropriedades.Motivo, motivo },
             { LogNomesPropriedades.Timestamp, DateTimeOffset.UtcNow }
         };
+
+        AdicionarCorrelationId(atributos);
+
         NR.NewRelic.RecordCustomEvent("AnaliseDiagramaComFalha", atributos);
+    }
+
+    public void RegistrarRelatorioGerado(Guid analiseDiagramaId, TipoRelatorioEnum tipoRelatorio)
+    {
+        var atributos = new Dictionary<string, object>
+        {
+            { LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId },
+            { LogNomesPropriedades.TipoRelatorio, tipoRelatorio.ToString() },
+            { LogNomesPropriedades.Timestamp, DateTimeOffset.UtcNow }
+        };
+
+        AdicionarCorrelationId(atributos);
+
+        NR.NewRelic.RecordCustomEvent("RelatorioGerado", atributos);
+    }
+
+    public void RegistrarRelatorioComFalha(Guid analiseDiagramaId, TipoRelatorioEnum tipoRelatorio, string motivo)
+    {
+        var atributos = new Dictionary<string, object>
+        {
+            { LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId },
+            { LogNomesPropriedades.TipoRelatorio, tipoRelatorio.ToString() },
+            { LogNomesPropriedades.Motivo, motivo },
+            { LogNomesPropriedades.Timestamp, DateTimeOffset.UtcNow }
+        };
+
+        AdicionarCorrelationId(atributos);
+
+        NR.NewRelic.RecordCustomEvent("RelatorioComFalha", atributos);
+    }
+
+    private static void AdicionarCorrelationId(Dictionary<string, object> atributos)
+    {
+        var correlationId = CorrelationContext.Current;
+        if (!string.IsNullOrWhiteSpace(correlationId))
+            atributos[LogNomesPropriedades.CorrelationId] = correlationId;
     }
 }

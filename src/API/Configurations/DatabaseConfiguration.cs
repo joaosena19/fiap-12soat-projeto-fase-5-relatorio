@@ -33,8 +33,6 @@ public static class DatabaseConfiguration
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
 
-        Console.WriteLine($"Conectado ao banco: Host={dbHost}, Port={dbPort}, Database={dbName}, User={dbUser}");
-
         return services;
     }
 }

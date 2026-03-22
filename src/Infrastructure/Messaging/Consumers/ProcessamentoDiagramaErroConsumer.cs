@@ -1,6 +1,7 @@
 using Application.Contracts.Gateways;
 using Application.Contracts.Messaging.Dtos;
 using Application.Contracts.Monitoramento;
+using Application.Extensions;
 using Infrastructure.Monitoramento;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,25 +28,35 @@ public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagrama
     {
         var mensagem = context.Message;
         var logger = new LoggerAdapter<ProcessamentoDiagramaErroConsumer>(_loggerFactory.CreateLogger<ProcessamentoDiagramaErroConsumer>());
-        var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
-        var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
 
-        logger.LogInformation($"Recebida mensagem de erro de processamento para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
-
-        var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
-
-        if (resultadoDiagrama == null)
+        try
         {
-            logger.LogWarning($"Resultado de diagrama não encontrado para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
-            return;
+            var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
+            var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
+            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de erro de processamento para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
+
+            var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
+
+            if (resultadoDiagrama == null)
+            {
+                logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Resultado de diagrama não encontrado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
+                return;
+            }
+
+            resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo);
+
+            await gateway.SalvarAsync(resultadoDiagrama);
+
+            metrics.RegistrarAnaliseComFalha(mensagem.AnaliseDiagramaId, mensagem.Motivo);
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Falha registrada para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}. {LogNomesPropriedades.Tentativas}: {{{LogNomesPropriedades.Tentativas}}}", mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.TentativasRealizadas);
         }
-
-        resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo);
-
-        await gateway.SalvarAsync(resultadoDiagrama);
-
-        metrics.RegistrarAnaliseComFalha(mensagem.AnaliseDiagramaId, mensagem.Motivo);
-
-        logger.LogWarning($"Falha registrada para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}. {LogNomesPropriedades.Tentativas}: {{{LogNomesPropriedades.Tentativas}}}", mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.TentativasRealizadas);
+        catch (Exception ex)
+        {
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogError(ex, "Erro ao consumir mensagem de erro de processamento");
+            throw;
+        }
     }
 }

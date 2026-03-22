@@ -9,5 +9,5 @@ public interface IArmazenamentoArquivoService
     /// Armazena um arquivo e retorna a URL de acesso.
     /// </summary>
     /// <returns>URL pública ou interna do arquivo armazenado.</returns>
-    Task<string> ArmazenarAsync(byte[] conteudo, string nomeArquivo, string contentType);
+    Task<string> ArmazenarAsync(Guid analiseDiagramaId, byte[] conteudo, string nomeArquivo, string contentType);
 }

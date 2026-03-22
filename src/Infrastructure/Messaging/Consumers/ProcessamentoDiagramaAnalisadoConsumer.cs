@@ -3,6 +3,7 @@ using Application.Contracts.Gateways;
 using Application.Contracts.Messaging;
 using Application.Contracts.Messaging.Dtos;
 using Application.Contracts.Monitoramento;
+using Application.Extensions;
 using Domain.AnaliseDiagrama.Entities;
 using Infrastructure.Monitoramento;
 using MassTransit;
@@ -30,30 +31,40 @@ public class ProcessamentoDiagramaAnalisadoConsumer : IConsumer<ProcessamentoDia
     {
         var mensagem = context.Message;
         var logger = new LoggerAdapter<ProcessamentoDiagramaAnalisadoConsumer>(_loggerFactory.CreateLogger<ProcessamentoDiagramaAnalisadoConsumer>());
-        var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
-        var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
 
-        logger.LogInformation($"Recebida mensagem de processamento analisado para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
-
-        var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
-
-        if (resultadoDiagrama == null)
+        try
         {
-            logger.LogWarning($"Resultado de diagrama não encontrado para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
-            return;
+            var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
+            var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
+            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de processamento analisado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
+
+            var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
+
+            if (resultadoDiagrama == null)
+            {
+                logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Resultado de diagrama não encontrado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
+                return;
+            }
+
+            var analiseResultado = AnaliseResultado.Criar(mensagem.DescricaoAnalise, mensagem.ComponentesIdentificados, mensagem.RiscosArquiteturais, mensagem.RecomendacoesBasicas);
+
+            resultadoDiagrama.RegistrarAnalise(analiseResultado);
+
+            await gateway.SalvarAsync(resultadoDiagrama);
+
+            var messagePublisher = _serviceProvider.GetRequiredService<IRelatorioMessagePublisher>();
+            await messagePublisher.PublicarSolicitacaoGeracaoAsync(mensagem.AnaliseDiagramaId, TiposRelatorioPadrao.Tipos);
+
+            metrics.RegistrarAnaliseConcluida(mensagem.AnaliseDiagramaId);
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogInformation($"Análise registrada com sucesso para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
         }
-
-        var analiseResultado = AnaliseResultado.Criar(mensagem.DescricaoAnalise, mensagem.ComponentesIdentificados, mensagem.RiscosArquiteturais, mensagem.RecomendacoesBasicas);
-
-        resultadoDiagrama.RegistrarAnalise(analiseResultado);
-
-        await gateway.SalvarAsync(resultadoDiagrama);
-
-        var messagePublisher = _serviceProvider.GetRequiredService<IRelatorioMessagePublisher>();
-        await messagePublisher.PublicarSolicitacaoGeracaoAsync(mensagem.AnaliseDiagramaId, TiposRelatorioPadrao.Tipos);
-
-        metrics.RegistrarAnaliseConcluida(mensagem.AnaliseDiagramaId);
-
-        logger.LogInformation($"Análise registrada com sucesso para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
+        catch (Exception ex)
+        {
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogError(ex, "Erro ao consumir mensagem de processamento analisado");
+            throw;
+        }
     }
 }
