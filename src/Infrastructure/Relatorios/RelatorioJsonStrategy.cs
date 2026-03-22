@@ -1,8 +1,8 @@
 using Application.Contracts.Monitoramento;
 using Application.Contracts.Relatorios;
-using Domain.AnaliseDiagrama.Aggregates;
-using Domain.AnaliseDiagrama.Enums;
-using ConteudosRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Conteudos;
+using Domain.ResultadoDiagrama.Aggregates;
+using Domain.ResultadoDiagrama.Enums;
+using ConteudosRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos;
 using Infrastructure.Monitoramento;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;

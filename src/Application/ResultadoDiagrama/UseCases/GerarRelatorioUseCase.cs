@@ -2,7 +2,7 @@ using Application.Contracts.Gateways;
 using Application.Contracts.Monitoramento;
 using Application.Contracts.Relatorios;
 using Application.Extensions;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Constants;
 
 namespace Application.ResultadoDiagrama.UseCases;

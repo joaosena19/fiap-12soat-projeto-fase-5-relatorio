@@ -1,25 +1,24 @@
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Attributes;
 using Shared.Enums;
 using Shared.Exceptions;
 
-namespace Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado;
+namespace Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado;
 
 [ValueObject]
 public record Status
 {
-    public StatusRelatorioEnum Valor { get; init; }
+    private readonly StatusRelatorioEnum _valor;
 
-    private Status()
-    {
-        Valor = default;
-    }
+    private Status() { }
 
     public Status(StatusRelatorioEnum valor)
     {
         if (!Enum.IsDefined(valor))
             throw new DomainException($"Status do relatório '{valor}' é inválido", ErrorType.InvalidInput);
 
-        Valor = valor;
+        _valor = valor;
     }
+
+    public StatusRelatorioEnum Valor => _valor;
 }

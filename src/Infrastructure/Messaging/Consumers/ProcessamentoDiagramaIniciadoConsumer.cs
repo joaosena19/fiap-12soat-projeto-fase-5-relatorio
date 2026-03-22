@@ -38,7 +38,7 @@ public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiag
 
             var resultadoExistente = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
 
-            var resultadoDiagrama = resultadoExistente ?? Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
+            var resultadoDiagrama = resultadoExistente ?? Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
             resultadoDiagrama.MarcarEmProcessamento();
 
             await gateway.SalvarAsync(resultadoDiagrama);

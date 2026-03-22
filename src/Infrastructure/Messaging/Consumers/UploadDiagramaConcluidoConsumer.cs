@@ -39,7 +39,7 @@ public class UploadDiagramaConcluidoConsumer : IConsumer<UploadDiagramaConcluido
                 return;
             }
 
-            resultadoDiagrama = Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
+            resultadoDiagrama = Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
             await gateway.SalvarAsync(resultadoDiagrama);
         }
         catch (Exception ex)

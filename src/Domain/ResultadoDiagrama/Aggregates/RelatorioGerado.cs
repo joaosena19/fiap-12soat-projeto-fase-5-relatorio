@@ -1,19 +1,19 @@
-using ConteudosRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Conteudos;
-using DataGeracaoRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.DataGeracao;
-using StatusRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Status;
-using TipoRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Tipo;
-using Domain.AnaliseDiagrama.Enums;
+using ConteudosRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos;
+using DataGeracaoRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.DataGeracao;
+using StatusRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Status;
+using TipoRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Tipo;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Attributes;
 
-namespace Domain.AnaliseDiagrama.Aggregates;
+namespace Domain.ResultadoDiagrama.Aggregates;
 
 [AggregateMember]
 public class RelatorioGerado
 {
-    public TipoRelatorio Tipo { get; set; } = null!;
-    public StatusRelatorio Status { get; set; } = null!;
-    public ConteudosRelatorio Conteudos { get; set; } = null!;
-    public DataGeracaoRelatorio? DataGeracao { get; set; }
+    public TipoRelatorio Tipo { get; private set; } = null!;
+    public StatusRelatorio Status { get; private set; } = null!;
+    public ConteudosRelatorio Conteudos { get; private set; } = null!;
+    public DataGeracaoRelatorio? DataGeracao { get; private set; }
 
     private RelatorioGerado() { }
 

@@ -2,7 +2,7 @@ using Application.Constants;
 using Application.Contracts.Messaging;
 using Application.Contracts.Messaging.Dtos;
 using Application.Extensions;
-using Domain.AnaliseDiagrama.Entities;
+using Domain.ResultadoDiagrama.Entities;
 using Infrastructure.Database;
 using Infrastructure.Monitoramento;
 using Infrastructure.Repositories;

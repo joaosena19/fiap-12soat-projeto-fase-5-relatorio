@@ -16,7 +16,7 @@ public class ResultadoDiagramaRepository : IResultadoDiagramaGateway
         _context = context;
     }
 
-    public async Task<Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama> SalvarAsync(Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama)
+    public async Task<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama> SalvarAsync(Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama)
     {
         var existente = await _context.ResultadosDiagrama.FindAsync(resultadoDiagrama.Id);
 
@@ -27,7 +27,7 @@ public class ResultadoDiagramaRepository : IResultadoDiagramaGateway
         return resultadoDiagrama;
     }
 
-    public async Task<Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama?> ObterPorAnaliseDiagramaIdAsync(Guid analiseDiagramaId)
+    public async Task<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama?> ObterPorAnaliseDiagramaIdAsync(Guid analiseDiagramaId)
     {
         return await _context.ResultadosDiagrama.FirstOrDefaultAsync(item => item.AnaliseDiagramaId == analiseDiagramaId);
     }

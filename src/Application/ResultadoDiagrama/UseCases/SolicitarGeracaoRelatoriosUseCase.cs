@@ -4,7 +4,7 @@ using Application.Contracts.Monitoramento;
 using Application.Contracts.Presenters;
 using Application.Extensions;
 using Application.ResultadoDiagrama.Dtos;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Constants;
 using Shared.Enums;
 using Shared.Exceptions;

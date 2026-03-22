@@ -1,17 +1,17 @@
-using MensagemErro = Domain.AnaliseDiagrama.ValueObjects.ErroResultadoDiagrama.Mensagem;
-using TipoRelatorioErro = Domain.AnaliseDiagrama.ValueObjects.ErroResultadoDiagrama.TipoRelatorio;
-using DataOcorrenciaErro = Domain.AnaliseDiagrama.ValueObjects.ErroResultadoDiagrama.DataOcorrencia;
-using Domain.AnaliseDiagrama.Enums;
+using MensagemErro = Domain.ResultadoDiagrama.ValueObjects.ErroResultadoDiagrama.Mensagem;
+using TipoRelatorioErro = Domain.ResultadoDiagrama.ValueObjects.ErroResultadoDiagrama.TipoRelatorio;
+using DataOcorrenciaErro = Domain.ResultadoDiagrama.ValueObjects.ErroResultadoDiagrama.DataOcorrencia;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Attributes;
 
-namespace Domain.AnaliseDiagrama.Aggregates;
+namespace Domain.ResultadoDiagrama.Aggregates;
 
 [AggregateMember]
 public class ErroResultadoDiagrama
 {
-    public MensagemErro Mensagem { get; set; } = null!;
-    public TipoRelatorioErro TipoRelatorio { get; set; } = null!;
-    public DataOcorrenciaErro DataOcorrencia { get; set; } = null!;
+    public MensagemErro Mensagem { get; private set; } = null!;
+    public TipoRelatorioErro TipoRelatorio { get; private set; } = null!;
+    public DataOcorrenciaErro DataOcorrencia { get; private set; } = null!;
 
     private ErroResultadoDiagrama() { }
 

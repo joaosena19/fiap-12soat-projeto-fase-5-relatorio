@@ -1,12 +1,12 @@
 using Application.Contracts.Presenters;
 using Application.ResultadoDiagrama.Dtos;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 
 namespace API.Presenters;
 
 public class BuscarResultadoDiagramaPresenter : BasePresenter, IBuscarResultadoDiagramaPresenter
 {
-    public void ApresentarSucesso(Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama)
+    public void ApresentarSucesso(Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama)
     {
         var dto = new RetornoResultadoDiagramaDto
         {

@@ -1,7 +1,7 @@
-using Domain.AnaliseDiagrama.ValueObjects.AnaliseResultado;
+using Domain.ResultadoDiagrama.ValueObjects.AnaliseResultado;
 using Shared.Attributes;
 
-namespace Domain.AnaliseDiagrama.Entities;
+namespace Domain.ResultadoDiagrama.Entities;
 
 [AggregateMember]
 public class AnaliseResultado

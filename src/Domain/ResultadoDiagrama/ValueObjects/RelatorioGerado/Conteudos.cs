@@ -2,21 +2,21 @@ using Shared.Attributes;
 using Shared.Enums;
 using Shared.Exceptions;
 
-namespace Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado;
+namespace Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado;
 
 [ValueObject]
 public record Conteudos
 {
-    public IReadOnlyDictionary<string, string> Valores { get; init; }
+    private readonly IReadOnlyDictionary<string, string> _valores;
 
     private Conteudos()
     {
-        Valores = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        _valores = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }
 
     private Conteudos(IDictionary<string, string> valores)
     {
-        Valores = new Dictionary<string, string>(valores, StringComparer.OrdinalIgnoreCase);
+        _valores = new Dictionary<string, string>(valores, StringComparer.OrdinalIgnoreCase);
     }
 
     public static Conteudos Vazio() => new();
@@ -56,6 +56,8 @@ public record Conteudos
 
         return new Conteudos(novoDicionario);
     }
+
+    public IReadOnlyDictionary<string, string> Valores => _valores;
 
     public string? ObterValor(string chave)
     {

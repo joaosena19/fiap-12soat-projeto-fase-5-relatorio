@@ -1,4 +1,4 @@
-namespace Domain.AnaliseDiagrama.Enums;
+namespace Domain.ResultadoDiagrama.Enums;
 
 public enum ResultadoSolicitacaoGeracaoRelatorioEnum
 {

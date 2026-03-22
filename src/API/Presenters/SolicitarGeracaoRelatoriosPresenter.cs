@@ -1,6 +1,6 @@
 using Application.Contracts.Presenters;
 using Application.ResultadoDiagrama.Dtos;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Presenters;

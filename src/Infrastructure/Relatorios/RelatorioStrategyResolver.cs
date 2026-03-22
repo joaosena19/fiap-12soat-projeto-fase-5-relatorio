@@ -1,5 +1,5 @@
 using Application.Contracts.Relatorios;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 
 namespace Infrastructure.Relatorios;
 

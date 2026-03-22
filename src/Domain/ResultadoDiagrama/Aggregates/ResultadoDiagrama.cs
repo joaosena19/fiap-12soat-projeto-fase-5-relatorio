@@ -1,13 +1,13 @@
-using DataCriacaoResultadoDiagrama = Domain.AnaliseDiagrama.ValueObjects.ResultadoDiagrama.DataCriacao;
-using StatusResultadoDiagrama = Domain.AnaliseDiagrama.ValueObjects.ResultadoDiagrama.Status;
-using ConteudosRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Conteudos;
-using Domain.AnaliseDiagrama.Entities;
-using Domain.AnaliseDiagrama.Enums;
+using DataCriacaoResultadoDiagrama = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.DataCriacao;
+using StatusResultadoDiagrama = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.Status;
+using ConteudosRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos;
+using Domain.ResultadoDiagrama.Entities;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Attributes;
 using Shared.Exceptions;
 using UUIDNext;
 
-namespace Domain.AnaliseDiagrama.Aggregates;
+namespace Domain.ResultadoDiagrama.Aggregates;
 
 [AggregateRoot]
 public class ResultadoDiagrama

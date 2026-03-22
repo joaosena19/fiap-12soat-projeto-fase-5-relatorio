@@ -2,7 +2,7 @@ using Shared.Attributes;
 using Shared.Enums;
 using Shared.Exceptions;
 
-namespace Domain.AnaliseDiagrama.ValueObjects.AnaliseResultado;
+namespace Domain.ResultadoDiagrama.ValueObjects.AnaliseResultado;
 
 [ValueObject]
 public record RiscoArquitetural

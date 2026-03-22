@@ -1,4 +1,4 @@
-using Domain.AnaliseDiagrama.Entities;
+using Domain.ResultadoDiagrama.Entities;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;

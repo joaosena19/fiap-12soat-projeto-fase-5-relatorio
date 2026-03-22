@@ -2,7 +2,7 @@ using Application.Contracts.Gateways;
 using Application.Contracts.Messaging;
 using Application.Contracts.Presenters;
 using Application.ResultadoDiagrama.UseCases;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Handlers;

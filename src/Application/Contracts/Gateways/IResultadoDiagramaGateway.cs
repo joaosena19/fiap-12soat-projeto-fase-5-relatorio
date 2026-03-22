@@ -5,6 +5,6 @@ namespace Application.Contracts.Gateways;
 /// </summary>
 public interface IResultadoDiagramaGateway
 {
-    Task<Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama> SalvarAsync(Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama);
-    Task<Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama?> ObterPorAnaliseDiagramaIdAsync(Guid analiseDiagramaId);
+    Task<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama> SalvarAsync(Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama);
+    Task<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama?> ObterPorAnaliseDiagramaIdAsync(Guid analiseDiagramaId);
 }

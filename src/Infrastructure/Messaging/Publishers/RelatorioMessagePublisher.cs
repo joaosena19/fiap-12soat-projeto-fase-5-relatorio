@@ -2,7 +2,7 @@ using Application.Contracts.Messaging;
 using Application.Contracts.Messaging.Dtos;
 using Application.Contracts.Monitoramento;
 using Application.Extensions;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Infrastructure.Monitoramento;
 using MassTransit;
 using Microsoft.Extensions.Logging;

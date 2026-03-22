@@ -1,25 +1,24 @@
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Attributes;
 using Shared.Enums;
 using Shared.Exceptions;
 
-namespace Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado;
+namespace Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado;
 
 [ValueObject]
 public record Tipo
 {
-    public TipoRelatorioEnum Valor { get; init; }
+    private readonly TipoRelatorioEnum _valor;
 
-    private Tipo()
-    {
-        Valor = default;
-    }
+    private Tipo() { }
 
     public Tipo(TipoRelatorioEnum valor)
     {
         if (!Enum.IsDefined(valor))
             throw new DomainException($"Tipo de relatório '{valor}' é inválido", ErrorType.InvalidInput);
 
-        Valor = valor;
+        _valor = valor;
     }
+
+    public TipoRelatorioEnum Valor => _valor;
 }

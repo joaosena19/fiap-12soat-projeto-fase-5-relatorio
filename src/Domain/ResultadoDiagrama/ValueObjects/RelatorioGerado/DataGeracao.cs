@@ -2,23 +2,22 @@ using Shared.Attributes;
 using Shared.Enums;
 using Shared.Exceptions;
 
-namespace Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado;
+namespace Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado;
 
 [ValueObject]
 public record DataGeracao
 {
-    public DateTimeOffset Valor { get; init; }
+    private readonly DateTimeOffset _valor;
 
-    private DataGeracao()
-    {
-        Valor = default;
-    }
+    private DataGeracao() { }
 
     public DataGeracao(DateTimeOffset valor)
     {
         if (valor == default)
             throw new DomainException("Data de geração inválida", ErrorType.InvalidInput);
 
-        Valor = valor;
+        _valor = valor;
     }
+
+    public DateTimeOffset Valor => _valor;
 }

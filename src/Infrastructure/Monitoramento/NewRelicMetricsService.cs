@@ -1,5 +1,5 @@
 using Application.Contracts.Monitoramento;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Shared.Constants;
 using Infrastructure.Monitoramento.Correlation;
 using NR = NewRelic.Api.Agent;

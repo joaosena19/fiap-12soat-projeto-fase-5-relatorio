@@ -1,12 +1,12 @@
-using Domain.AnaliseDiagrama.Aggregates;
-using Domain.AnaliseDiagrama.Entities;
-using Domain.AnaliseDiagrama.Enums;
-using Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado;
+using Domain.ResultadoDiagrama.Aggregates;
+using Domain.ResultadoDiagrama.Entities;
+using Domain.ResultadoDiagrama.Enums;
+using Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ResultadoDiagramaDataCriacao = Domain.AnaliseDiagrama.ValueObjects.ResultadoDiagrama.DataCriacao;
-using ResultadoDiagramaStatus = Domain.AnaliseDiagrama.ValueObjects.ResultadoDiagrama.Status;
+using ResultadoDiagramaDataCriacao = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.DataCriacao;
+using ResultadoDiagramaStatus = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.Status;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -159,11 +159,11 @@ public class ResultadoDiagramaConfiguration : IEntityTypeConfiguration<Resultado
 
         public RelatorioGerado ParaDominio()
         {
-            var conteudos = Conteudos.Count > 0 ? Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Conteudos.Criar(Conteudos) : Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Conteudos.Vazio();
+            var conteudos = Conteudos.Count > 0 ? Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos.Criar(Conteudos) : Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos.Vazio();
 
             return RelatorioGerado.Reidratar(
                 new Tipo(Tipo),
-                new Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Status(Status),
+                new Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Status(Status),
                 conteudos,
                 DataGeracao.HasValue ? new DataGeracao(DataGeracao.Value) : null);
         }

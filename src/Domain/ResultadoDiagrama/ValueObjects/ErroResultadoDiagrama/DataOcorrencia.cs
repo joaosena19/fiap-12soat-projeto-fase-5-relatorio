@@ -2,7 +2,7 @@ using Shared.Attributes;
 using Shared.Enums;
 using Shared.Exceptions;
 
-namespace Domain.AnaliseDiagrama.ValueObjects.ErroResultadoDiagrama;
+namespace Domain.ResultadoDiagrama.ValueObjects.ErroResultadoDiagrama;
 
 [ValueObject]
 public record DataOcorrencia
