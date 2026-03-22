@@ -19,5 +19,7 @@
     <PackageReference Include="MassTransit.AmazonSQS" Version="8.4.0" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="NewRelic.Agent.Api" Version="10.47.1" />
+    <PackageReference Include="QuestPDF" Version="2025.4.0" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.412.3" />
   </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@ using Infrastructure.Messaging.Publishers;
 using Infrastructure.Repositories;
 using Infrastructure.Relatorios;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 using Serilog;
 using NewRelic.LogEnrichers.Serilog;
 
@@ -38,6 +39,8 @@ if (!string.IsNullOrWhiteSpace(licenseKey))
 
 Log.Logger = loggerConfig.CreateLogger();
 
+QuestPDF.Settings.License = LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
@@ -49,6 +52,7 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddMonitoring();
 builder.Services.AddMessaging(builder.Configuration);
 builder.Services.AddHealthChecks(builder.Configuration);
+builder.Services.AddArmazenamento(builder.Configuration);
 builder.Services.AddScoped<IResultadoDiagramaGateway, ResultadoDiagramaRepository>();
 builder.Services.AddScoped<IRelatorioMessagePublisher, RelatorioMessagePublisher>();
 builder.Services.AddScoped<IRelatorioStrategy, RelatorioMarkdownStrategy>();

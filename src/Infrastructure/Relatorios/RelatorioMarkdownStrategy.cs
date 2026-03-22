@@ -1,3 +1,4 @@
+using Application.Contracts.Armazenamento;
 using Application.Contracts.Relatorios;
 using Domain.AnaliseDiagrama.Aggregates;
 using Domain.AnaliseDiagrama.Enums;
@@ -7,14 +8,38 @@ using System.Text;
 
 namespace Infrastructure.Relatorios;
 
+/// <summary>
+/// Estratégia de geração de relatório em formato Markdown com upload para S3.
+/// </summary>
 public class RelatorioMarkdownStrategy : IRelatorioStrategy
 {
+    private readonly IArmazenamentoArquivoService _armazenamentoArquivoService;
+
+    public RelatorioMarkdownStrategy(IArmazenamentoArquivoService armazenamentoArquivoService)
+    {
+        _armazenamentoArquivoService = armazenamentoArquivoService;
+    }
+
     public TipoRelatorioEnum TipoRelatorio => TipoRelatorioEnum.Markdown;
 
-    public Task<ConteudosRelatorio> GerarAsync(ResultadoDiagrama resultadoDiagrama)
+    public async Task<ConteudosRelatorio> GerarAsync(ResultadoDiagrama resultadoDiagrama)
     {
         var analise = resultadoDiagrama.AnaliseResultado ?? throw new InvalidOperationException("Análise não está disponível para gerar markdown");
 
+        var markdownString = ConstruirMarkdown(analise);
+        var markdownBytes = Encoding.UTF8.GetBytes(markdownString);
+        var nomeArquivo = $"{resultadoDiagrama.AnaliseDiagramaId}/relatorio.md";
+        var url = await _armazenamentoArquivoService.ArmazenarAsync(markdownBytes, nomeArquivo, "text/markdown");
+
+        var conteudos = ConteudosRelatorio.Vazio()
+            .Adicionar(ConteudoRelatorioChaves.InlineMarkdown, markdownString)
+            .Adicionar(ConteudoRelatorioChaves.Url, url);
+
+        return conteudos;
+    }
+
+    private static string ConstruirMarkdown(Domain.AnaliseDiagrama.Entities.AnaliseResultado analise)
+    {
         var builder = new StringBuilder();
 
         builder.AppendLine("# Relatório Técnico");
@@ -38,11 +63,6 @@ public class RelatorioMarkdownStrategy : IRelatorioStrategy
         foreach (var item in analise.RecomendacoesBasicas)
             builder.AppendLine($"- {item.Valor}");
 
-        var markdownString = builder.ToString();
-        var conteudos = ConteudosRelatorio.Vazio()
-            .Adicionar(ConteudoRelatorioChaves.Url, $"data:text/markdown;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(markdownString))}")
-            .Adicionar(ConteudoRelatorioChaves.InlineMarkdown, markdownString);
-
-        return Task.FromResult(conteudos);
+        return builder.ToString();
     }
 }
