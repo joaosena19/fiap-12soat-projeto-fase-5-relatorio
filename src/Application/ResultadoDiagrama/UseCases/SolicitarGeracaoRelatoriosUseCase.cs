@@ -49,14 +49,20 @@ public class SolicitarGeracaoRelatoriosUseCase
             {
                 var resultado = resultadoDiagrama.ObterResultadoSolicitacaoGeracaoRelatorio(tipoRelatorio);
 
-                if (resultado == ResultadoSolicitacaoGeracaoRelatorioEnum.EmProcessamento)
+                if (resultado == ResultadoSolicitacaoGeracaoRelatorioEnum.AceitoParaGeracao)
+                {
+                    resultadoDiagrama.MarcarRelatorioSolicitado(tipoRelatorio);
                     tiposParaFila.Add(tipoRelatorio);
+                }
 
                 itensResposta.Add(new ItemResultadoSolicitacaoRelatorioDto { Tipo = tipoRelatorio, Resultado = resultado });
             }
 
             if (tiposParaFila.Count > 0)
+            {
+                await gateway.SalvarAsync(resultadoDiagrama);
                 await messagePublisher.PublicarSolicitacaoGeracaoAsync(analiseDiagramaId, tiposParaFila);
+            }
 
             presenter.ApresentarSucesso(new ResultadoSolicitacaoRelatoriosDto { AnaliseDiagramaId = analiseDiagramaId, Relatorios = itensResposta });
         }

@@ -41,7 +41,12 @@ public class RelatorioGerado
 
     public bool PodeGerar()
     {
-        return Status.Valor == StatusRelatorioEnum.NaoSolicitado || Status.Valor == StatusRelatorioEnum.Erro;
+        return Status.Valor == StatusRelatorioEnum.NaoSolicitado || Status.Valor == StatusRelatorioEnum.Solicitado || Status.Valor == StatusRelatorioEnum.Erro;
+    }
+
+    public void MarcarSolicitado()
+    {
+        Status = new StatusRelatorio(StatusRelatorioEnum.Solicitado);
     }
 
     public void MarcarEmProcessamento()

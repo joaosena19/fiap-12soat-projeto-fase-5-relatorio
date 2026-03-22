@@ -1,4 +1,6 @@
+using Application.Constants;
 using Application.Contracts.Gateways;
+using Application.Contracts.Messaging;
 using Application.Contracts.Messaging.Dtos;
 using Application.Contracts.Monitoramento;
 using Domain.AnaliseDiagrama.Entities;
@@ -7,7 +9,6 @@ using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
-using System.Text.Json;
 
 namespace Infrastructure.Messaging;
 
@@ -44,18 +45,12 @@ public class ProcessamentoDiagramaAnalisadoConsumer : IConsumer<ProcessamentoDia
 
         var analiseResultado = AnaliseResultado.Criar(mensagem.DescricaoAnalise, mensagem.ComponentesIdentificados, mensagem.RiscosArquiteturais, mensagem.RecomendacoesBasicas);
 
-        var relatorioTecnico = JsonSerializer.Serialize(new
-        {
-            mensagem.DescricaoAnalise,
-            mensagem.ComponentesIdentificados,
-            mensagem.RiscosArquiteturais,
-            mensagem.RecomendacoesBasicas,
-            mensagem.DataConclusao
-        });
-
-        resultadoDiagrama.RegistrarAnalise(analiseResultado, relatorioTecnico);
+        resultadoDiagrama.RegistrarAnalise(analiseResultado);
 
         await gateway.SalvarAsync(resultadoDiagrama);
+
+        var messagePublisher = _serviceProvider.GetRequiredService<IRelatorioMessagePublisher>();
+        await messagePublisher.PublicarSolicitacaoGeracaoAsync(mensagem.AnaliseDiagramaId, TiposRelatorioPadrao.Tipos);
 
         metrics.RegistrarAnaliseConcluida(mensagem.AnaliseDiagramaId);
 

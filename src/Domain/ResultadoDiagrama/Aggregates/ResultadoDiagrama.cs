@@ -41,13 +41,20 @@ public class ResultadoDiagrama
         Status = new StatusResultadoDiagrama(StatusAnaliseEnum.EmProcessamento);
     }
 
-    public void RegistrarAnalise(AnaliseResultado analiseResultado, string jsonString)
+    public void RegistrarAnalise(AnaliseResultado analiseResultado)
     {
         AnaliseResultado = analiseResultado;
         Status = new StatusResultadoDiagrama(StatusAnaliseEnum.Analisado);
+    }
 
-        var conteudos = ConteudosRelatorio.Vazio().Adicionar(Shared.Constants.ConteudoRelatorioChaves.JsonString, jsonString);
-        ObterRelatorio(TipoRelatorioEnum.Json).Concluir(conteudos);
+    public bool AnaliseDisponivel()
+    {
+        return AnaliseResultado != null && Status.Valor == StatusAnaliseEnum.Analisado;
+    }
+
+    public void MarcarRelatorioSolicitado(TipoRelatorioEnum tipoRelatorio)
+    {
+        ObterRelatorio(tipoRelatorio).MarcarSolicitado();
     }
 
     public void MarcarRelatorioEmProcessamento(TipoRelatorioEnum tipoRelatorio)
@@ -85,10 +92,12 @@ public class ResultadoDiagrama
     {
         var relatorio = ObterRelatorio(tipoRelatorio);
 
-        if (relatorio.Status.Valor == StatusRelatorioEnum.Concluido)
-            return ResultadoSolicitacaoGeracaoRelatorioEnum.Concluido;
-
-        return ResultadoSolicitacaoGeracaoRelatorioEnum.EmProcessamento;
+        return relatorio.Status.Valor switch
+        {
+            StatusRelatorioEnum.Concluido => ResultadoSolicitacaoGeracaoRelatorioEnum.Concluido,
+            StatusRelatorioEnum.EmProcessamento or StatusRelatorioEnum.Solicitado => ResultadoSolicitacaoGeracaoRelatorioEnum.JaEmAndamento,
+            _ => ResultadoSolicitacaoGeracaoRelatorioEnum.AceitoParaGeracao
+        };
     }
 
     private static List<RelatorioGerado> CriarRelatoriosPadrao()

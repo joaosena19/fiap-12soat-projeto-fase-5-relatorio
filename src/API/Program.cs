@@ -53,6 +53,7 @@ builder.Services.AddScoped<IResultadoDiagramaGateway, ResultadoDiagramaRepositor
 builder.Services.AddScoped<IRelatorioMessagePublisher, RelatorioMessagePublisher>();
 builder.Services.AddScoped<IRelatorioStrategy, RelatorioMarkdownStrategy>();
 builder.Services.AddScoped<IRelatorioStrategy, RelatorioPdfStrategy>();
+builder.Services.AddScoped<IRelatorioStrategy, RelatorioJsonStrategy>();
 builder.Services.AddScoped<IRelatorioStrategyResolver, RelatorioStrategyResolver>();
 
 

@@ -10,7 +10,8 @@ public class SolicitarGeracaoRelatoriosPresenter : BasePresenter, ISolicitarGera
     private static readonly Dictionary<ResultadoSolicitacaoGeracaoRelatorioEnum, (int StatusHttp, string Mensagem)> MapeamentoResultados = new()
     {
         [ResultadoSolicitacaoGeracaoRelatorioEnum.Concluido] = (StatusCodes.Status200OK, "Relatório já gerado. Consulte o endpoint GET para obter o conteúdo"),
-        [ResultadoSolicitacaoGeracaoRelatorioEnum.EmProcessamento] = (StatusCodes.Status202Accepted, "O relatório está sendo processado. Consulte o endpoint GET em alguns instantes")
+        [ResultadoSolicitacaoGeracaoRelatorioEnum.AceitoParaGeracao] = (StatusCodes.Status202Accepted, "Solicitação aceita. O relatório será processado em breve"),
+        [ResultadoSolicitacaoGeracaoRelatorioEnum.JaEmAndamento] = (StatusCodes.Status202Accepted, "O relatório já está sendo processado. Consulte o endpoint GET em alguns instantes")
     };
 
     public void ApresentarSucesso(ResultadoSolicitacaoRelatoriosDto resultado)

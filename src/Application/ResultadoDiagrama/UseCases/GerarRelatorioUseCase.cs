@@ -27,7 +27,7 @@ public class GerarRelatorioUseCase
         if (!relatorio.PodeGerar())
             return;
 
-        if (!resultadoDiagrama.PodeGerarRelatorioSobDemanda(tipoRelatorio))
+        if (!resultadoDiagrama.AnaliseDisponivel())
         {
             logger.ComUseCase(this).LogWarning($"Solicitação ignorada para relatório {{{LogNomesPropriedades.TipoRelatorio}}} em {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}} porque a análise ainda não está disponível", tipoRelatorio, analiseDiagramaId);
             return;
