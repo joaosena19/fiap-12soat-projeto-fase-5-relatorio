@@ -1,10 +1,9 @@
-using Application.Contracts.Gateways;
 using Application.Contracts.Messaging.Dtos;
-using Application.Contracts.Monitoramento;
 using Application.Extensions;
+using Infrastructure.Database;
 using Infrastructure.Monitoramento;
+using Infrastructure.Repositories;
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
@@ -15,12 +14,12 @@ namespace Infrastructure.Messaging;
 /// </summary>
 public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiagramaIniciadoDto>
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly AppDbContext _context;
     private readonly ILoggerFactory _loggerFactory;
 
-    public ProcessamentoDiagramaIniciadoConsumer(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+    public ProcessamentoDiagramaIniciadoConsumer(AppDbContext context, ILoggerFactory loggerFactory)
     {
-        _serviceProvider = serviceProvider;
+        _context = context;
         _loggerFactory = loggerFactory;
     }
 
@@ -31,8 +30,8 @@ public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiag
 
         try
         {
-            var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
-            var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
+            var gateway = new ResultadoDiagramaRepository(_context);
+            var metrics = new NewRelicMetricsService();
             var messageId = context.MessageId?.ToString() ?? "desconhecido";
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de processamento iniciado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);

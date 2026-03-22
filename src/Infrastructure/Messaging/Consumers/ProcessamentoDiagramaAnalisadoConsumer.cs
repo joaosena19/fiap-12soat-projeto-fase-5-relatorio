@@ -1,13 +1,12 @@
 using Application.Constants;
-using Application.Contracts.Gateways;
 using Application.Contracts.Messaging;
 using Application.Contracts.Messaging.Dtos;
-using Application.Contracts.Monitoramento;
 using Application.Extensions;
 using Domain.AnaliseDiagrama.Entities;
+using Infrastructure.Database;
 using Infrastructure.Monitoramento;
+using Infrastructure.Repositories;
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
@@ -18,12 +17,14 @@ namespace Infrastructure.Messaging;
 /// </summary>
 public class ProcessamentoDiagramaAnalisadoConsumer : IConsumer<ProcessamentoDiagramaAnalisadoDto>
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly AppDbContext _context;
+    private readonly IRelatorioMessagePublisher _messagePublisher;
     private readonly ILoggerFactory _loggerFactory;
 
-    public ProcessamentoDiagramaAnalisadoConsumer(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+    public ProcessamentoDiagramaAnalisadoConsumer(AppDbContext context, IRelatorioMessagePublisher messagePublisher, ILoggerFactory loggerFactory)
     {
-        _serviceProvider = serviceProvider;
+        _context = context;
+        _messagePublisher = messagePublisher;
         _loggerFactory = loggerFactory;
     }
 
@@ -34,8 +35,8 @@ public class ProcessamentoDiagramaAnalisadoConsumer : IConsumer<ProcessamentoDia
 
         try
         {
-            var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
-            var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
+            var gateway = new ResultadoDiagramaRepository(_context);
+            var metrics = new NewRelicMetricsService();
             var messageId = context.MessageId?.ToString() ?? "desconhecido";
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de processamento analisado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
@@ -54,8 +55,7 @@ public class ProcessamentoDiagramaAnalisadoConsumer : IConsumer<ProcessamentoDia
 
             await gateway.SalvarAsync(resultadoDiagrama);
 
-            var messagePublisher = _serviceProvider.GetRequiredService<IRelatorioMessagePublisher>();
-            await messagePublisher.PublicarSolicitacaoGeracaoAsync(mensagem.AnaliseDiagramaId, TiposRelatorioPadrao.Tipos);
+            await _messagePublisher.PublicarSolicitacaoGeracaoAsync(mensagem.AnaliseDiagramaId, TiposRelatorioPadrao.Tipos);
 
             metrics.RegistrarAnaliseConcluida(mensagem.AnaliseDiagramaId);
 

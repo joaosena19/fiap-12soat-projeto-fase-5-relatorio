@@ -1,9 +1,9 @@
-using Application.Contracts.Gateways;
 using Application.Contracts.Messaging.Dtos;
 using Application.Extensions;
+using Infrastructure.Database;
 using Infrastructure.Monitoramento;
+using Infrastructure.Repositories;
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
@@ -11,12 +11,12 @@ namespace Infrastructure.Messaging;
 
 public class UploadDiagramaConcluidoConsumer : IConsumer<UploadDiagramaConcluidoDto>
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly AppDbContext _context;
     private readonly ILoggerFactory _loggerFactory;
 
-    public UploadDiagramaConcluidoConsumer(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+    public UploadDiagramaConcluidoConsumer(AppDbContext context, ILoggerFactory loggerFactory)
     {
-        _serviceProvider = serviceProvider;
+        _context = context;
         _loggerFactory = loggerFactory;
     }
 
@@ -27,7 +27,7 @@ public class UploadDiagramaConcluidoConsumer : IConsumer<UploadDiagramaConcluido
 
         try
         {
-            var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
+            var gateway = new ResultadoDiagramaRepository(_context);
             var messageId = context.MessageId?.ToString() ?? "desconhecido";
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de upload concluído para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
