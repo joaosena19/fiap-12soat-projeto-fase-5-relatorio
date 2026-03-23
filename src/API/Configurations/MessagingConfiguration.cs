@@ -19,6 +19,7 @@ public static class MessagingConfiguration
         services.AddMassTransit(x =>
         {
             x.AddConsumer<UploadDiagramaConcluidoConsumer>();
+            x.AddConsumer<UploadDiagramaRejeitadoConsumer>();
             x.AddConsumer<ProcessamentoDiagramaIniciadoConsumer>();
             x.AddConsumer<ProcessamentoDiagramaAnalisadoConsumer>();
             x.AddConsumer<ProcessamentoDiagramaErroConsumer>();
@@ -42,6 +43,7 @@ public static class MessagingConfiguration
                 });
 
                 cfg.Message<UploadDiagramaConcluidoDto>(m => m.SetEntityName("fase5-upload-diagrama-concluido"));
+                cfg.Message<UploadDiagramaRejeitadoDto>(m => m.SetEntityName("fase5-upload-diagrama-rejeitado"));
                 cfg.Message<ProcessamentoDiagramaIniciadoDto>(m => m.SetEntityName("fase5-processamento-diagrama-iniciado"));
                 cfg.Message<ProcessamentoDiagramaAnalisadoDto>(m => m.SetEntityName("fase5-processamento-diagrama-analisado"));
                 cfg.Message<ProcessamentoDiagramaErroDto>(m => m.SetEntityName("fase5-processamento-diagrama-erro"));
@@ -50,6 +52,11 @@ public static class MessagingConfiguration
                 cfg.ReceiveEndpoint("fase5-upload-diagrama-concluido", e =>
                 {
                     e.ConfigureConsumer<UploadDiagramaConcluidoConsumer>(context);
+                });
+
+                cfg.ReceiveEndpoint("fase5-upload-diagrama-rejeitado", e =>
+                {
+                    e.ConfigureConsumer<UploadDiagramaRejeitadoConsumer>(context);
                 });
 
                 cfg.ReceiveEndpoint("fase5-processamento-diagrama-iniciado", e =>

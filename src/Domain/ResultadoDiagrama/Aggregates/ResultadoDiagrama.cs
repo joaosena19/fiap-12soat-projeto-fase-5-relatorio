@@ -38,6 +38,9 @@ public class ResultadoDiagrama
 
     public void MarcarEmProcessamento()
     {
+        if (Status.Valor != StatusAnaliseEnum.Recebido)
+            throw new DomainException($"Só é possível marcar EmProcessamento quando o status atual for Recebido. Status atual: {Status.Valor}");
+
         Status = new StatusResultadoDiagrama(StatusAnaliseEnum.EmProcessamento);
     }
 
