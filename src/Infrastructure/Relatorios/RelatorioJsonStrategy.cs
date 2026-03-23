@@ -1,12 +1,9 @@
-using Application.Contracts.Monitoramento;
-using Application.Contracts.Relatorios;
-using Domain.ResultadoDiagrama.Aggregates;
+using Domain.ResultadoDiagrama.Entities;
 using Domain.ResultadoDiagrama.Enums;
 using ConteudosRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos;
 using Infrastructure.Monitoramento;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
-using System.Diagnostics;
 using System.Text.Json;
 
 namespace Infrastructure.Relatorios;
@@ -14,24 +11,14 @@ namespace Infrastructure.Relatorios;
 /// <summary>
 /// Estratégia de geração de relatório em formato JSON a partir da análise do diagrama.
 /// </summary>
-public class RelatorioJsonStrategy : IRelatorioStrategy
+public class RelatorioJsonStrategy : BaseRelatorioStrategy
 {
-    private readonly IAppLogger _logger;
+    public RelatorioJsonStrategy(ILoggerFactory loggerFactory) : base(loggerFactory.CriarAppLogger<RelatorioJsonStrategy>()) { }
 
-    public RelatorioJsonStrategy(ILoggerFactory loggerFactory)
+    public override TipoRelatorioEnum TipoRelatorio => TipoRelatorioEnum.Json;
+
+    protected override Task<ConteudosRelatorio> GerarConteudoAsync(Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama, AnaliseResultado analise)
     {
-        _logger = new LoggerAdapter<RelatorioJsonStrategy>(loggerFactory.CreateLogger<RelatorioJsonStrategy>());
-    }
-
-    public TipoRelatorioEnum TipoRelatorio => TipoRelatorioEnum.Json;
-
-    public Task<ConteudosRelatorio> GerarAsync(ResultadoDiagrama resultadoDiagrama)
-    {
-        var cronometro = Stopwatch.StartNew();
-        var analise = resultadoDiagrama.AnaliseResultado ?? throw new InvalidOperationException("Análise não está disponível para gerar JSON");
-
-        _logger.ComPropriedade(LogNomesPropriedades.TipoRelatorio, TipoRelatorio).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, resultadoDiagrama.AnaliseDiagramaId).LogDebug($"Iniciando geração de relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", TipoRelatorio, resultadoDiagrama.AnaliseDiagramaId);
-
         try
         {
             var jsonString = JsonSerializer.Serialize(new
@@ -44,13 +31,11 @@ public class RelatorioJsonStrategy : IRelatorioStrategy
 
             var conteudos = ConteudosRelatorio.Vazio().Adicionar(ConteudoRelatorioChaves.JsonString, jsonString);
 
-            _logger.ComPropriedade(LogNomesPropriedades.TipoRelatorio, TipoRelatorio).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, resultadoDiagrama.AnaliseDiagramaId).LogDebug($"Relatório {{{LogNomesPropriedades.TipoRelatorio}}} gerado para {{{LogNomesPropriedades.AnaliseDiagramaId}}} em {{{LogNomesPropriedades.DuracaoMs}}}ms", TipoRelatorio, resultadoDiagrama.AnaliseDiagramaId, cronometro.ElapsedMilliseconds);
-
             return Task.FromResult(conteudos);
         }
         catch (Exception ex)
         {
-            _logger.ComPropriedade(LogNomesPropriedades.TipoRelatorio, TipoRelatorio).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, resultadoDiagrama.AnaliseDiagramaId).LogError(ex, $"Erro ao gerar conteúdo do relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", TipoRelatorio, resultadoDiagrama.AnaliseDiagramaId);
+            CriarLoggerContextualizado(resultadoDiagrama).LogError(ex, $"Erro ao gerar conteúdo do relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", TipoRelatorio, resultadoDiagrama.AnaliseDiagramaId);
             throw;
         }
     }

@@ -9,7 +9,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Consumers;
 
 public class SolicitarGeracaoRelatoriosConsumer : IConsumer<SolicitarGeracaoRelatoriosDto>
 {
@@ -27,14 +27,14 @@ public class SolicitarGeracaoRelatoriosConsumer : IConsumer<SolicitarGeracaoRela
     public async Task Consume(ConsumeContext<SolicitarGeracaoRelatoriosDto> context)
     {
         var mensagem = context.Message;
-        var logger = new LoggerAdapter<SolicitarGeracaoRelatoriosConsumer>(_loggerFactory.CreateLogger<SolicitarGeracaoRelatoriosConsumer>());
+        var logger = _loggerFactory.CriarAppLogger<SolicitarGeracaoRelatoriosConsumer>();
 
         try
         {
             var gateway = new ResultadoDiagramaRepository(_context);
             var metrics = new NewRelicMetricsService();
             var useCase = new GerarRelatorioUseCase();
-            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+            var messageId = context.MessageId?.ToString() ?? LogNomesValores.Desconhecido;
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).ComPropriedade(LogNomesPropriedades.QuantidadeTipos, mensagem.TiposRelatorio.Count).LogInformation($"Recebida solicitação assíncrona de geração de relatórios com {{{LogNomesPropriedades.QuantidadeTipos}}} tipo(s). {{{LogNomesPropriedades.MessageId}}}", mensagem.TiposRelatorio.Count, messageId);
 

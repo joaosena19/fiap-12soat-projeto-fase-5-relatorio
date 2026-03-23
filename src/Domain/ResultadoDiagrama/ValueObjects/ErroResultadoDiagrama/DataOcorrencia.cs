@@ -7,18 +7,17 @@ namespace Domain.ResultadoDiagrama.ValueObjects.ErroResultadoDiagrama;
 [ValueObject]
 public record DataOcorrencia
 {
-    public DateTimeOffset Valor { get; init; }
+    private readonly DateTimeOffset _valor;
 
-    private DataOcorrencia()
-    {
-        Valor = default;
-    }
+    private DataOcorrencia() { }
 
     public DataOcorrencia(DateTimeOffset valor)
     {
         if (valor == default)
             throw new DomainException("Data de ocorrência inválida", ErrorType.InvalidInput);
 
-        Valor = valor;
+        _valor = valor;
     }
+
+    public DateTimeOffset Valor => _valor;
 }

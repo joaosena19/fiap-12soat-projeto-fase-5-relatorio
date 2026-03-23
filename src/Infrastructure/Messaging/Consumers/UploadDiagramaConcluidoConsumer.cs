@@ -7,7 +7,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Consumers;
 
 public class UploadDiagramaConcluidoConsumer : IConsumer<UploadDiagramaConcluidoDto>
 {
@@ -23,12 +23,12 @@ public class UploadDiagramaConcluidoConsumer : IConsumer<UploadDiagramaConcluido
     public async Task Consume(ConsumeContext<UploadDiagramaConcluidoDto> context)
     {
         var mensagem = context.Message;
-        var logger = new LoggerAdapter<UploadDiagramaConcluidoConsumer>(_loggerFactory.CreateLogger<UploadDiagramaConcluidoConsumer>());
+        var logger = _loggerFactory.CriarAppLogger<UploadDiagramaConcluidoConsumer>();
 
         try
         {
             var gateway = new ResultadoDiagramaRepository(_context);
-            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+            var messageId = context.MessageId?.ToString() ?? LogNomesValores.Desconhecido;
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de upload concluído para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
 

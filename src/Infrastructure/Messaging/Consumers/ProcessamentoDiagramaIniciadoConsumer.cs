@@ -7,7 +7,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Consumers;
 
 /// <summary>
 /// Consumer MassTransit que consome mensagens de processamento iniciado e atualiza o resultado.
@@ -26,13 +26,13 @@ public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiag
     public async Task Consume(ConsumeContext<ProcessamentoDiagramaIniciadoDto> context)
     {
         var mensagem = context.Message;
-        var logger = new LoggerAdapter<ProcessamentoDiagramaIniciadoConsumer>(_loggerFactory.CreateLogger<ProcessamentoDiagramaIniciadoConsumer>());
+        var logger = _loggerFactory.CriarAppLogger<ProcessamentoDiagramaIniciadoConsumer>();
 
         try
         {
             var gateway = new ResultadoDiagramaRepository(_context);
             var metrics = new NewRelicMetricsService();
-            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+            var messageId = context.MessageId?.ToString() ?? LogNomesValores.Desconhecido;
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de processamento iniciado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
 

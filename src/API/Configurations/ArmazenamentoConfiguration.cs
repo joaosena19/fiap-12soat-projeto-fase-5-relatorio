@@ -14,7 +14,8 @@ public static class ArmazenamentoConfiguration
     /// </summary>
     public static IServiceCollection AddArmazenamento(this IServiceCollection services, IConfiguration configuration)
     {
-        var region = Amazon.RegionEndpoint.GetBySystemName(configuration["AWS:Region"] ?? "us-east-1");
+        var nomeRegiao = configuration["AWS:Region"] ?? throw new InvalidOperationException("Configuração AWS:Region não encontrada");
+        var region = Amazon.RegionEndpoint.GetBySystemName(nomeRegiao);
 
         var accessKey = configuration["AWS:AccessKeyId"];
         var secretKey = configuration["AWS:SecretAccessKey"];

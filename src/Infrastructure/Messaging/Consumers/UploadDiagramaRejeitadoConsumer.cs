@@ -7,7 +7,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Consumers;
 
 public class UploadDiagramaRejeitadoConsumer : IConsumer<UploadDiagramaRejeitadoDto>
 {
@@ -23,13 +23,13 @@ public class UploadDiagramaRejeitadoConsumer : IConsumer<UploadDiagramaRejeitado
     public async Task Consume(ConsumeContext<UploadDiagramaRejeitadoDto> context)
     {
         var mensagem = context.Message;
-        var logger = new LoggerAdapter<UploadDiagramaRejeitadoConsumer>(_loggerFactory.CreateLogger<UploadDiagramaRejeitadoConsumer>());
+        var logger = _loggerFactory.CriarAppLogger<UploadDiagramaRejeitadoConsumer>();
 
         try
         {
             var gateway = new ResultadoDiagramaRepository(_context);
             var metrics = new NewRelicMetricsService();
-            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+            var messageId = context.MessageId?.ToString() ?? LogNomesValores.Desconhecido;
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).ComPropriedade(LogNomesPropriedades.Motivo, mensagem.MotivoRejeicao).LogInformation($"Recebida mensagem de upload rejeitado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
 

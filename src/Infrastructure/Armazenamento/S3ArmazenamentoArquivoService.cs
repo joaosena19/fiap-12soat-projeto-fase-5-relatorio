@@ -23,7 +23,7 @@ public class S3ArmazenamentoArquivoService : IArmazenamentoArquivoService
     {
         _s3Client = s3Client;
         _bucketName = configuration["AWS:S3:BucketName"] ?? throw new InvalidOperationException("Configuração do bucket S3 não encontrada");
-        _logger = new LoggerAdapter<S3ArmazenamentoArquivoService>(loggerFactory.CreateLogger<S3ArmazenamentoArquivoService>());
+        _logger = loggerFactory.CriarAppLogger<S3ArmazenamentoArquivoService>();
     }
 
     public async Task<string> ArmazenarAsync(Guid analiseDiagramaId, byte[] conteudo, string nomeArquivo, string contentType)

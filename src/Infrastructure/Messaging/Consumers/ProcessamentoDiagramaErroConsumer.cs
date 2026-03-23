@@ -7,7 +7,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Consumers;
 
 /// <summary>
 /// Consumer MassTransit que consome mensagens de processamento com erro e registra a falha.
@@ -26,13 +26,13 @@ public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagrama
     public async Task Consume(ConsumeContext<ProcessamentoDiagramaErroDto> context)
     {
         var mensagem = context.Message;
-        var logger = new LoggerAdapter<ProcessamentoDiagramaErroConsumer>(_loggerFactory.CreateLogger<ProcessamentoDiagramaErroConsumer>());
+        var logger = _loggerFactory.CriarAppLogger<ProcessamentoDiagramaErroConsumer>();
 
         try
         {
             var gateway = new ResultadoDiagramaRepository(_context);
             var metrics = new NewRelicMetricsService();
-            var messageId = context.MessageId?.ToString() ?? "desconhecido";
+            var messageId = context.MessageId?.ToString() ?? LogNomesValores.Desconhecido;
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de erro de processamento para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
 

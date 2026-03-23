@@ -10,6 +10,22 @@ namespace Infrastructure.Relatorios.Pdf;
 /// </summary>
 public class RelatorioAnalisePdfDocumento : IDocument
 {
+    private const string TituloPrincipal = "Relatório Técnico de Análise de Diagrama";
+    private const string TituloSecaoDescricao = "Descrição da Análise";
+    private const string TituloSecaoComponentes = "Componentes Identificados";
+    private const string TituloSecaoRiscos = "Riscos Arquiteturais";
+    private const string TituloSecaoRecomendacoes = "Recomendações Básicas";
+    private const string RotuloPagina = "Página ";
+    private const string SeparadorPagina = " de ";
+    private const int MargemPagina = 40;
+    private const int TamanhoFontePadrao = 11;
+    private const int TamanhoFonteTituloPrincipal = 20;
+    private const int TamanhoFonteTituloSecao = 14;
+    private const int PaddingTopoLinhaCabecalho = 5;
+    private const int PaddingTopoConteudo = 15;
+    private const int PaddingBottomSecao = 10;
+    private const int PaddingLeftItemLista = 10;
+
     private readonly AnaliseResultado _analiseResultado;
 
     public RelatorioAnalisePdfDocumento(AnaliseResultado analiseResultado)
@@ -24,16 +40,16 @@ public class RelatorioAnalisePdfDocumento : IDocument
         container.Page(page =>
         {
             page.Size(PageSizes.A4);
-            page.Margin(40);
-            page.DefaultTextStyle(estilo => estilo.FontSize(11));
+            page.Margin(MargemPagina);
+            page.DefaultTextStyle(estilo => estilo.FontSize(TamanhoFontePadrao));
 
             page.Header().Column(coluna =>
             {
-                coluna.Item().Text("Relatório Técnico de Análise de Diagrama").FontSize(20).Bold().FontColor(Colors.Blue.Darken2);
-                coluna.Item().PaddingTop(5).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+                coluna.Item().Text(TituloPrincipal).FontSize(TamanhoFonteTituloPrincipal).Bold().FontColor(Colors.Blue.Darken2);
+                coluna.Item().PaddingTop(PaddingTopoLinhaCabecalho).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
             });
 
-            page.Content().PaddingTop(15).Column(coluna =>
+            page.Content().PaddingTop(PaddingTopoConteudo).Column(coluna =>
             {
                 ComporSecaoDescricao(coluna);
                 ComporSecaoComponentes(coluna);
@@ -43,9 +59,9 @@ public class RelatorioAnalisePdfDocumento : IDocument
 
             page.Footer().AlignCenter().Text(texto =>
             {
-                texto.Span("Página ");
+                texto.Span(RotuloPagina);
                 texto.CurrentPageNumber();
-                texto.Span(" de ");
+                texto.Span(SeparadorPagina);
                 texto.TotalPages();
             });
         });
@@ -53,48 +69,48 @@ public class RelatorioAnalisePdfDocumento : IDocument
 
     private void ComporSecaoDescricao(ColumnDescriptor coluna)
     {
-        coluna.Item().PaddingBottom(10).Column(secao =>
+        coluna.Item().PaddingBottom(PaddingBottomSecao).Column(secao =>
         {
-            secao.Item().Text("Descrição da Análise").FontSize(14).Bold().FontColor(Colors.Blue.Darken1);
-            secao.Item().PaddingTop(5).Text(_analiseResultado.DescricaoAnalise.Valor);
+            secao.Item().Text(TituloSecaoDescricao).FontSize(TamanhoFonteTituloSecao).Bold().FontColor(Colors.Blue.Darken1);
+            secao.Item().PaddingTop(PaddingTopoLinhaCabecalho).Text(_analiseResultado.DescricaoAnalise.Valor);
         });
     }
 
     private void ComporSecaoComponentes(ColumnDescriptor coluna)
     {
-        coluna.Item().PaddingBottom(10).Column(secao =>
+        coluna.Item().PaddingBottom(PaddingBottomSecao).Column(secao =>
         {
-            secao.Item().Text("Componentes Identificados").FontSize(14).Bold().FontColor(Colors.Blue.Darken1);
-            secao.Item().PaddingTop(5).Column(lista =>
+            secao.Item().Text(TituloSecaoComponentes).FontSize(TamanhoFonteTituloSecao).Bold().FontColor(Colors.Blue.Darken1);
+            secao.Item().PaddingTop(PaddingTopoLinhaCabecalho).Column(lista =>
             {
                 foreach (var componente in _analiseResultado.ComponentesIdentificados)
-                    lista.Item().PaddingLeft(10).Text($"• {componente.Valor}");
+                    lista.Item().PaddingLeft(PaddingLeftItemLista).Text($"• {componente.Valor}");
             });
         });
     }
 
     private void ComporSecaoRiscos(ColumnDescriptor coluna)
     {
-        coluna.Item().PaddingBottom(10).Column(secao =>
+        coluna.Item().PaddingBottom(PaddingBottomSecao).Column(secao =>
         {
-            secao.Item().Text("Riscos Arquiteturais").FontSize(14).Bold().FontColor(Colors.Red.Darken1);
-            secao.Item().PaddingTop(5).Column(lista =>
+            secao.Item().Text(TituloSecaoRiscos).FontSize(TamanhoFonteTituloSecao).Bold().FontColor(Colors.Red.Darken1);
+            secao.Item().PaddingTop(PaddingTopoLinhaCabecalho).Column(lista =>
             {
                 foreach (var risco in _analiseResultado.RiscosArquiteturais)
-                    lista.Item().PaddingLeft(10).Text($"• {risco.Valor}");
+                    lista.Item().PaddingLeft(PaddingLeftItemLista).Text($"• {risco.Valor}");
             });
         });
     }
 
     private void ComporSecaoRecomendacoes(ColumnDescriptor coluna)
     {
-        coluna.Item().PaddingBottom(10).Column(secao =>
+        coluna.Item().PaddingBottom(PaddingBottomSecao).Column(secao =>
         {
-            secao.Item().Text("Recomendações Básicas").FontSize(14).Bold().FontColor(Colors.Green.Darken2);
-            secao.Item().PaddingTop(5).Column(lista =>
+            secao.Item().Text(TituloSecaoRecomendacoes).FontSize(TamanhoFonteTituloSecao).Bold().FontColor(Colors.Green.Darken2);
+            secao.Item().PaddingTop(PaddingTopoLinhaCabecalho).Column(lista =>
             {
                 foreach (var recomendacao in _analiseResultado.RecomendacoesBasicas)
-                    lista.Item().PaddingLeft(10).Text($"• {recomendacao.Valor}");
+                    lista.Item().PaddingLeft(PaddingLeftItemLista).Text($"• {recomendacao.Valor}");
             });
         });
     }

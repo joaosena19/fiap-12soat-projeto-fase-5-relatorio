@@ -8,18 +8,17 @@ namespace Domain.ResultadoDiagrama.ValueObjects.ErroResultadoDiagrama;
 [ValueObject]
 public record TipoRelatorio
 {
-    public TipoRelatorioEnum? Valor { get; init; }
+    private readonly TipoRelatorioEnum? _valor;
 
-    private TipoRelatorio()
-    {
-        Valor = null;
-    }
+    private TipoRelatorio() { }
 
     public TipoRelatorio(TipoRelatorioEnum? valor)
     {
         if (valor.HasValue && !Enum.IsDefined(valor.Value))
             throw new DomainException($"Tipo de relatório '{valor}' é inválido", ErrorType.InvalidInput);
 
-        Valor = valor;
+        _valor = valor;
     }
+
+    public TipoRelatorioEnum? Valor => _valor;
 }

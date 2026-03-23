@@ -1,3 +1,5 @@
+using API.Dtos;
+using API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
 
@@ -15,19 +17,10 @@ public abstract class BasePresenter
 
     public void ApresentarErro(string mensagem, ErrorType errorType)
     {
-        var errorResponse = new { message = mensagem };
+        var statusCode = (int)errorType.ToHttpStatusCode();
+        var errorResponse = new ErrorResponseDto(mensagem, statusCode);
 
-        _resultado = errorType switch
-        {
-            ErrorType.Conflict => new ConflictObjectResult(errorResponse),
-            ErrorType.InvalidInput => new BadRequestObjectResult(errorResponse),
-            ErrorType.ResourceNotFound => new NotFoundObjectResult(errorResponse),
-            ErrorType.ReferenceNotFound => new UnprocessableEntityObjectResult(errorResponse),
-            ErrorType.DomainRuleBroken => new UnprocessableEntityObjectResult(errorResponse),
-            ErrorType.Unauthorized => new UnauthorizedObjectResult(errorResponse),
-            ErrorType.NotAllowed => new ObjectResult(errorResponse) { StatusCode = 403 },
-            _ => new ObjectResult(errorResponse) { StatusCode = 500 }
-        };
+        _resultado = new ObjectResult(errorResponse) { StatusCode = statusCode };
         _foiSucesso = false;
     }
 
@@ -47,12 +40,6 @@ public abstract class BasePresenter
     protected void DefinirSucesso(object dados)
     {
         _resultado = new OkObjectResult(dados);
-        _foiSucesso = true;
-    }
-
-    protected void DefinirSucessoComLocalizacao(string action, string controller, object routeValues, object dados)
-    {
-        _resultado = new CreatedAtActionResult(action, controller, routeValues, dados);
         _foiSucesso = true;
     }
 }

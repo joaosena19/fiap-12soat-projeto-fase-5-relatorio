@@ -24,4 +24,14 @@ public class ErroResultadoDiagrama
             DataOcorrencia = new DataOcorrenciaErro(DateTimeOffset.UtcNow)
         };
     }
+
+    public static ErroResultadoDiagrama Reidratar(string mensagem, TipoRelatorioEnum? tipoRelatorio, DateTimeOffset dataOcorrencia)
+    {
+        return new ErroResultadoDiagrama
+        {
+            Mensagem = new MensagemErro(mensagem),
+            TipoRelatorio = new TipoRelatorioErro(tipoRelatorio),
+            DataOcorrencia = new DataOcorrenciaErro(dataOcorrencia)
+        };
+    }
 }

@@ -20,7 +20,7 @@ public class RelatorioMessagePublisher : IRelatorioMessagePublisher
     {
         _publishEndpoint = publishEndpoint;
         _correlationIdAccessor = correlationIdAccessor;
-        _logger = new LoggerAdapter<RelatorioMessagePublisher>(loggerFactory.CreateLogger<RelatorioMessagePublisher>());
+        _logger = loggerFactory.CriarAppLogger<RelatorioMessagePublisher>();
     }
 
     public async Task PublicarSolicitacaoGeracaoAsync(Guid analiseDiagramaId, IReadOnlyCollection<TipoRelatorioEnum> tiposRelatorio)

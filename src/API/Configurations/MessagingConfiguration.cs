@@ -1,5 +1,6 @@
 using Application.Contracts.Messaging.Dtos;
 using Infrastructure.Messaging;
+using Infrastructure.Messaging.Consumers;
 using Infrastructure.Messaging.Filters;
 using MassTransit;
 using System.Text.Json.Serialization;
@@ -28,7 +29,7 @@ public static class MessagingConfiguration
 
             x.UsingAmazonSqs((context, cfg) =>
             {
-                var region = configuration["AWS:Region"] ?? "us-east-1";
+                var region = configuration["AWS:Region"] ?? throw new InvalidOperationException("Configuração AWS:Region não encontrada");
 
                 cfg.Host(region, h =>
                 {
@@ -42,42 +43,26 @@ public static class MessagingConfiguration
                     }
                 });
 
-                cfg.Message<UploadDiagramaConcluidoDto>(m => m.SetEntityName("fase5-upload-diagrama-concluido"));
-                cfg.Message<UploadDiagramaRejeitadoDto>(m => m.SetEntityName("fase5-upload-diagrama-rejeitado"));
-                cfg.Message<ProcessamentoDiagramaIniciadoDto>(m => m.SetEntityName("fase5-processamento-diagrama-iniciado"));
-                cfg.Message<ProcessamentoDiagramaAnalisadoDto>(m => m.SetEntityName("fase5-processamento-diagrama-analisado"));
-                cfg.Message<ProcessamentoDiagramaErroDto>(m => m.SetEntityName("fase5-processamento-diagrama-erro"));
-                cfg.Message<SolicitarGeracaoRelatoriosDto>(m => m.SetEntityName("fase5-relatorio-solicitar-geracao"));
+                var topicoUploadConcluido = configuration["Mensageria:Topicos:UploadDiagramaConcluido"]!;
+                var topicoUploadRejeitado = configuration["Mensageria:Topicos:UploadDiagramaRejeitado"]!;
+                var topicoProcessamentoIniciado = configuration["Mensageria:Topicos:ProcessamentoDiagramaIniciado"]!;
+                var topicoProcessamentoAnalisado = configuration["Mensageria:Topicos:ProcessamentoDiagramaAnalisado"]!;
+                var topicoProcessamentoErro = configuration["Mensageria:Topicos:ProcessamentoDiagramaErro"]!;
+                var topicoSolicitarGeracao = configuration["Mensageria:Topicos:SolicitarGeracaoRelatorios"]!;
 
-                cfg.ReceiveEndpoint("fase5-upload-diagrama-concluido", e =>
-                {
-                    e.ConfigureConsumer<UploadDiagramaConcluidoConsumer>(context);
-                });
+                cfg.Message<UploadDiagramaConcluidoDto>(m => m.SetEntityName(topicoUploadConcluido));
+                cfg.Message<UploadDiagramaRejeitadoDto>(m => m.SetEntityName(topicoUploadRejeitado));
+                cfg.Message<ProcessamentoDiagramaIniciadoDto>(m => m.SetEntityName(topicoProcessamentoIniciado));
+                cfg.Message<ProcessamentoDiagramaAnalisadoDto>(m => m.SetEntityName(topicoProcessamentoAnalisado));
+                cfg.Message<ProcessamentoDiagramaErroDto>(m => m.SetEntityName(topicoProcessamentoErro));
+                cfg.Message<SolicitarGeracaoRelatoriosDto>(m => m.SetEntityName(topicoSolicitarGeracao));
 
-                cfg.ReceiveEndpoint("fase5-upload-diagrama-rejeitado", e =>
-                {
-                    e.ConfigureConsumer<UploadDiagramaRejeitadoConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint("fase5-processamento-diagrama-iniciado", e =>
-                {
-                    e.ConfigureConsumer<ProcessamentoDiagramaIniciadoConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint("fase5-processamento-diagrama-analisado", e =>
-                {
-                    e.ConfigureConsumer<ProcessamentoDiagramaAnalisadoConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint("fase5-processamento-diagrama-erro", e =>
-                {
-                    e.ConfigureConsumer<ProcessamentoDiagramaErroConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint("fase5-relatorio-solicitar-geracao", e =>
-                {
-                    e.ConfigureConsumer<SolicitarGeracaoRelatoriosConsumer>(context);
-                });
+                cfg.ReceiveEndpoint(topicoUploadConcluido, e => e.ConfigureConsumer<UploadDiagramaConcluidoConsumer>(context));
+                cfg.ReceiveEndpoint(topicoUploadRejeitado, e => e.ConfigureConsumer<UploadDiagramaRejeitadoConsumer>(context));
+                cfg.ReceiveEndpoint(topicoProcessamentoIniciado, e => e.ConfigureConsumer<ProcessamentoDiagramaIniciadoConsumer>(context));
+                cfg.ReceiveEndpoint(topicoProcessamentoAnalisado, e => e.ConfigureConsumer<ProcessamentoDiagramaAnalisadoConsumer>(context));
+                cfg.ReceiveEndpoint(topicoProcessamentoErro, e => e.ConfigureConsumer<ProcessamentoDiagramaErroConsumer>(context));
+                cfg.ReceiveEndpoint(topicoSolicitarGeracao, e => e.ConfigureConsumer<SolicitarGeracaoRelatoriosConsumer>(context));
 
                 cfg.UseSendFilter(typeof(SendCorrelationIdFilter<>), context);
                 cfg.UsePublishFilter(typeof(PublishCorrelationIdFilter<>), context);
