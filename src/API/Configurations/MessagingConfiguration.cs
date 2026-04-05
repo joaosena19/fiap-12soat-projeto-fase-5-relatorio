@@ -44,6 +44,7 @@ public static class MessagingConfiguration
                 });
 
                 var topicoUploadConcluido = configuration["Mensageria:Topicos:UploadDiagramaConcluido"]!;
+                var filaUploadConcluido = configuration["Mensageria:Filas:UploadDiagramaConcluido"] ?? topicoUploadConcluido;
                 var topicoUploadRejeitado = configuration["Mensageria:Topicos:UploadDiagramaRejeitado"]!;
                 var topicoProcessamentoIniciado = configuration["Mensageria:Topicos:ProcessamentoDiagramaIniciado"]!;
                 var topicoProcessamentoAnalisado = configuration["Mensageria:Topicos:ProcessamentoDiagramaAnalisado"]!;
@@ -57,7 +58,7 @@ public static class MessagingConfiguration
                 cfg.Message<ProcessamentoDiagramaErroDto>(m => m.SetEntityName(topicoProcessamentoErro));
                 cfg.Message<SolicitarGeracaoRelatoriosDto>(m => m.SetEntityName(topicoSolicitarGeracao));
 
-                cfg.ReceiveEndpoint(topicoUploadConcluido, e => e.ConfigureConsumer<UploadDiagramaConcluidoConsumer>(context));
+                cfg.ReceiveEndpoint(filaUploadConcluido, e => e.ConfigureConsumer<UploadDiagramaConcluidoConsumer>(context));
                 cfg.ReceiveEndpoint(topicoUploadRejeitado, e => e.ConfigureConsumer<UploadDiagramaRejeitadoConsumer>(context));
                 cfg.ReceiveEndpoint(topicoProcessamentoIniciado, e => e.ConfigureConsumer<ProcessamentoDiagramaIniciadoConsumer>(context));
                 cfg.ReceiveEndpoint(topicoProcessamentoAnalisado, e => e.ConfigureConsumer<ProcessamentoDiagramaAnalisadoConsumer>(context));
