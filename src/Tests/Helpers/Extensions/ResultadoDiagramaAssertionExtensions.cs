@@ -32,4 +32,36 @@ public static class ResultadoDiagramaAssertionExtensions
         resultado.DeveEstarComErro();
         resultado.Erros[^1].Mensagem.Valor.ShouldBe(mensagemEsperada);
     }
+
+    public static void DeveEstarRecentementeCriado(this ResultadoDiagrama resultado, Guid analiseDiagramaId)
+    {
+        resultado.Id.ShouldNotBe(Guid.Empty);
+        resultado.AnaliseDiagramaId.ShouldBe(analiseDiagramaId);
+        resultado.DeveEstarComStatus(StatusAnaliseEnum.Recebido);
+        resultado.AnaliseResultado.ShouldBeNull();
+        resultado.Relatorios.Count.ShouldBe(Enum.GetValues<TipoRelatorioEnum>().Length);
+        resultado.Relatorios.All(item => item.Status.Valor == StatusRelatorioEnum.NaoSolicitado).ShouldBeTrue();
+        resultado.Erros.ShouldBeEmpty();
+        resultado.DataCriacao.Valor.ShouldNotBe(default);
+    }
+
+    public static void DeveEstarComErroSemRelatorio(this ResultadoDiagrama resultado)
+    {
+        resultado.DeveEstarComStatus(StatusAnaliseEnum.Erro);
+        resultado.Erros.Count.ShouldBe(1);
+        resultado.Erros[0].TipoRelatorio.Valor.ShouldBeNull();
+    }
+
+    public static void DeveEstarComErroEUltimoMotivo(this ResultadoDiagrama resultado, string mensagemEsperada)
+    {
+        resultado.Status.Valor.ShouldBe(StatusAnaliseEnum.Erro);
+        resultado.Erros.ShouldNotBeEmpty();
+        resultado.Erros[^1].Mensagem.Valor.ShouldBe(mensagemEsperada);
+    }
+
+    public static void DeveTerErroDoTipoRelatorio(this ResultadoDiagrama resultado, TipoRelatorioEnum tipoRelatorio)
+    {
+        resultado.Erros.ShouldNotBeEmpty();
+        resultado.Erros.Any(item => item.TipoRelatorio.Valor == tipoRelatorio).ShouldBeTrue();
+    }
 }

@@ -19,6 +19,9 @@ public static class RelatorioStrategyMockExtensions
         mock.Setup(x => x.TipoRelatorio).Returns(tipo);
     }
 
+    public static void DeveTerGerado(this Mock<IRelatorioStrategy> mock)
+        => mock.Verify(item => item.GerarAsync(It.IsAny<global::Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama>()), Times.Once);
+
     public sealed class ResolverSetup
     {
         private readonly Mock<IRelatorioStrategyResolver> _mock;
