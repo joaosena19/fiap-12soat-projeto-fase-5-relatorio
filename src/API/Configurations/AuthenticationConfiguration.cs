@@ -15,10 +15,10 @@ public static class AuthenticationConfiguration
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtKey = configuration["Jwt:Key"];
-        var jwtIssuer = configuration["Jwt:Issuer"];
-        var jwtAudience = configuration["Jwt:Audience"];
+        var jwtIssuer = configuration["Jwt:Issuer"] ?? "UploadDiagramaApi";
+        var jwtAudience = configuration["Jwt:Audience"] ?? "AuthorizedServices";
 
-        if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+        if (string.IsNullOrEmpty(jwtKey))
             throw new InvalidOperationException("Configuração JWT está ausente");
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
