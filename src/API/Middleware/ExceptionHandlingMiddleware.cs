@@ -1,5 +1,8 @@
 using API.Dtos;
 using API.Extensions;
+using Application.Contracts.Monitoramento;
+using Application.Extensions;
+using Infrastructure.Monitoramento;
 using Shared.Exceptions;
 using System.Net;
 using System.Text.Json;
@@ -13,12 +16,12 @@ public class ExceptionHandlingMiddleware
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IAppLogger _logger;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
     {
         _next = next;
-        _logger = logger;
+        _logger = loggerFactory.CriarAppLogger<ExceptionHandlingMiddleware>();
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -42,14 +45,14 @@ public class ExceptionHandlingMiddleware
         switch (exception)
         {
             case DomainException domainEx:
-                _logger.LogWarning(domainEx, "Domain exception occurred: {Message}", domainEx.Message);
+                _logger.ComDomainErrorType(domainEx).LogWarning(domainEx, "Exceção de domínio: {Message}", domainEx.Message);
                 var httpStatusCode = domainEx.ErrorType.ToHttpStatusCode();
                 response = new ErrorResponseDto(domainEx.Message, (int)httpStatusCode);
                 context.Response.StatusCode = (int)httpStatusCode;
                 break;
 
             default:
-                _logger.LogError(exception, "An unexpected error occurred: {Message}", exception.Message);
+                _logger.LogError(exception, "Erro inesperado: {Message}", exception.Message);
                 response = new ErrorResponseDto("Ocorreu um erro interno no servidor.", (int)HttpStatusCode.InternalServerError);
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 break;

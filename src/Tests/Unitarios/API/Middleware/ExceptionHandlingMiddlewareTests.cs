@@ -7,7 +7,7 @@ namespace Tests.API.Middleware;
 
 public class ExceptionHandlingMiddlewareTests
 {
-    private readonly Mock<ILogger<ExceptionHandlingMiddleware>> _loggerMock = new();
+    private static readonly ILoggerFactory _loggerFactory = new LoggerFactory();
 
     [Fact(DisplayName = "Deve retornar status code correto para DomainException")]
     [Trait("API", "ExceptionHandlingMiddleware")]
@@ -16,7 +16,7 @@ public class ExceptionHandlingMiddlewareTests
         // Arrange
         var contexto = new DefaultHttpContext();
         contexto.Response.Body = new MemoryStream();
-        var middleware = new ExceptionHandlingMiddleware(_ => throw new DomainException("recurso não encontrado", ErrorType.ResourceNotFound), _loggerMock.Object);
+        var middleware = new ExceptionHandlingMiddleware(_ => throw new DomainException("recurso não encontrado", ErrorType.ResourceNotFound), _loggerFactory);
 
         // Act
         await middleware.InvokeAsync(contexto);
@@ -36,7 +36,7 @@ public class ExceptionHandlingMiddlewareTests
         // Arrange
         var contexto = new DefaultHttpContext();
         contexto.Response.Body = new MemoryStream();
-        var middleware = new ExceptionHandlingMiddleware(_ => throw new InvalidOperationException("falha inesperada"), _loggerMock.Object);
+        var middleware = new ExceptionHandlingMiddleware(_ => throw new InvalidOperationException("falha inesperada"), _loggerFactory);
 
         // Act
         await middleware.InvokeAsync(contexto);
@@ -56,7 +56,7 @@ public class ExceptionHandlingMiddlewareTests
         // Arrange
         var foiChamado = false;
         var contexto = new DefaultHttpContext();
-        var middleware = new ExceptionHandlingMiddleware(_ => { foiChamado = true; return Task.CompletedTask; }, _loggerMock.Object);
+        var middleware = new ExceptionHandlingMiddleware(_ => { foiChamado = true; return Task.CompletedTask; }, _loggerFactory);
 
         // Act
         await middleware.InvokeAsync(contexto);
