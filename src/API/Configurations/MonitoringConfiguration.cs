@@ -15,7 +15,6 @@ public static class MonitoringConfiguration
     {
         services.AddHttpContextAccessor();
         services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
-        services.AddSingleton<IMetricsService, NewRelicMetricsService>();
 
         return services;
     }

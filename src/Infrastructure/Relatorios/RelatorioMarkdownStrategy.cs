@@ -1,20 +1,63 @@
-using Application.Contracts.Relatorios;
-using Domain.AnaliseDiagrama.Aggregates;
-using Domain.AnaliseDiagrama.Enums;
-using ConteudosRelatorio = Domain.AnaliseDiagrama.ValueObjects.RelatorioGerado.Conteudos;
+using Application.Contracts.Armazenamento;
+using Domain.ResultadoDiagrama.Entities;
+using Domain.ResultadoDiagrama.Enums;
+using ConteudosRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos;
+using Infrastructure.Monitoramento;
+using Microsoft.Extensions.Logging;
 using Shared.Constants;
 using System.Text;
 
 namespace Infrastructure.Relatorios;
 
-public class RelatorioMarkdownStrategy : IRelatorioStrategy
+/// <summary>
+/// Estratégia de geração de relatório em formato Markdown com upload para S3.
+/// </summary>
+public class RelatorioMarkdownStrategy : BaseRelatorioStrategy
 {
-    public TipoRelatorioEnum TipoRelatorio => TipoRelatorioEnum.Markdown;
+    private readonly IArmazenamentoArquivoService _armazenamentoArquivoService;
 
-    public Task<ConteudosRelatorio> GerarAsync(ResultadoDiagrama resultadoDiagrama)
+    public RelatorioMarkdownStrategy(IArmazenamentoArquivoService armazenamentoArquivoService, ILoggerFactory loggerFactory) : base(loggerFactory.CriarAppLogger<RelatorioMarkdownStrategy>())
     {
-        var analise = resultadoDiagrama.AnaliseResultado ?? throw new InvalidOperationException("Análise não está disponível para gerar markdown");
+        _armazenamentoArquivoService = armazenamentoArquivoService;
+    }
 
+    public override TipoRelatorioEnum TipoRelatorio => TipoRelatorioEnum.Markdown;
+
+    protected override async Task<ConteudosRelatorio> GerarConteudoAsync(Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama, AnaliseResultado analise)
+    {
+        var nomeArquivo = $"{resultadoDiagrama.AnaliseDiagramaId}/relatorio.md";
+
+        string markdownString;
+        byte[] markdownBytes;
+
+        try
+        {
+            markdownString = ConstruirMarkdown(analise);
+            markdownBytes = Encoding.UTF8.GetBytes(markdownString);
+        }
+        catch (Exception ex)
+        {
+            CriarLoggerContextualizado(resultadoDiagrama, nomeArquivo).LogError(ex, $"Erro ao gerar conteúdo do relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", TipoRelatorio, resultadoDiagrama.AnaliseDiagramaId);
+            throw;
+        }
+
+        try
+        {
+            var url = await _armazenamentoArquivoService.ArmazenarAsync(resultadoDiagrama.AnaliseDiagramaId, markdownBytes, nomeArquivo, "text/markdown");
+
+            return ConteudosRelatorio.Vazio()
+                .Adicionar(ConteudoRelatorioChaves.InlineMarkdown, markdownString)
+                .Adicionar(ConteudoRelatorioChaves.Url, url);
+        }
+        catch (Exception ex)
+        {
+            CriarLoggerContextualizado(resultadoDiagrama, nomeArquivo).LogError(ex, $"Erro ao salvar no S3 o relatório {{{LogNomesPropriedades.TipoRelatorio}}} para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", TipoRelatorio, resultadoDiagrama.AnaliseDiagramaId);
+            throw;
+        }
+    }
+
+    private static string ConstruirMarkdown(AnaliseResultado analise)
+    {
         var builder = new StringBuilder();
 
         builder.AppendLine("# Relatório Técnico");
@@ -38,11 +81,6 @@ public class RelatorioMarkdownStrategy : IRelatorioStrategy
         foreach (var item in analise.RecomendacoesBasicas)
             builder.AppendLine($"- {item.Valor}");
 
-        var markdownString = builder.ToString();
-        var conteudos = ConteudosRelatorio.Vazio()
-            .Adicionar(ConteudoRelatorioChaves.Url, $"data:text/markdown;base64,{Convert.ToBase64String(Encoding.UTF8.GetBytes(markdownString))}")
-            .Adicionar(ConteudoRelatorioChaves.InlineMarkdown, markdownString);
-
-        return Task.FromResult(conteudos);
+        return builder.ToString();
     }
 }

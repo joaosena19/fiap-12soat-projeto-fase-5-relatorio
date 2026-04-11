@@ -1,0 +1,15 @@
+global using Application.Contracts.Gateways;
+global using Application.Contracts.Messaging;
+global using Application.Contracts.Monitoramento;
+global using Application.Contracts.Presenters;
+global using Application.Contracts.Relatorios;
+global using Application.ResultadoDiagrama.Dtos;
+global using Domain.ResultadoDiagrama.Enums;
+global using Moq;
+global using Shared.Enums;
+global using Shared.Exceptions;
+global using Shouldly;
+global using Tests.Helpers.Builders;
+global using Tests.Helpers.Extensions;
+global using Tests.Helpers.MockExtensions;
+global using Xunit;

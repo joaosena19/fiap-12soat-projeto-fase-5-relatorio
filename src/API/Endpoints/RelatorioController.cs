@@ -2,10 +2,11 @@ using API.Dtos;
 using API.Presenters;
 using Application.Contracts.Messaging;
 using Application.ResultadoDiagrama.Dtos;
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 using Infrastructure.Database;
 using Infrastructure.Handlers;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Endpoints;
@@ -15,6 +16,7 @@ namespace API.Endpoints;
 /// </summary>
 [Route("api/relatorio")]
 [ApiController]
+[Authorize]
 [Produces("application/json")]
 public class RelatorioController : BaseController
 {

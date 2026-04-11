@@ -150,7 +150,7 @@ jobs:
 
       - name: Buscar dados do PostgreSQL via Terraform State
         run: |
-          STATE_DATA=$(aws s3 cp s3://${{ secrets.TF_VAR_BUCKET_NAME }}/${{ env.DB_STATE_KEY }} -)
+          STATE_DATA=$(aws s3 cp s3://${{ secrets.TF_VAR_TFSTATE_BUCKET_NAME }}/${{ env.DB_STATE_KEY }} -)
           DB_HOST_VALUE=$(echo "$STATE_DATA" | jq -r '.outputs.db_instance_address.value')
           DB_PORT_VALUE=$(echo "$STATE_DATA" | jq -r '.outputs.db_instance_port.value // "5432"')
           DB_NAME_VALUE=$(echo "$STATE_DATA" | jq -r '.outputs.db_name.value')
@@ -167,6 +167,12 @@ jobs:
           echo "DB_NAME_VALUE=$DB_NAME_VALUE" >> $GITHUB_ENV
           echo "DB_USERNAME_VALUE=$DB_USERNAME_VALUE" >> $GITHUB_ENV
 
+      - name: Buscar dados da infraestrutura via Terraform State (Infra)
+        run: |
+          INFRA_STATE=$(aws s3 cp s3://${{ secrets.TF_VAR_TFSTATE_BUCKET_NAME }}/infra/terraform.tfstate -)
+          S3_BUCKET_NAME=$(echo "$INFRA_STATE" | jq -r '.outputs.upload_bucket_name.value // empty')
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_ENV
+
       - name: Configurar acesso ao cluster EKS
         run: |
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ secrets.TF_VAR_EKS_CLUSTER_NAME }}
@@ -178,6 +184,7 @@ jobs:
           kubectl create secret generic ${{ env.K8S_SECRET_NAME }} \
             --from-literal=DatabaseConnection__Password=${{ secrets.DB_MASTER_PASSWORD }} \
             --from-literal=ApiCredentials__ClientSecret=${{ secrets.API_CLIENT_SECRET }} \
+            --from-literal=Jwt__Key=${{ secrets.JWT_KEY }} \
             --from-literal=NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }} \
             --from-literal=AWS__AccessKeyId=${{ secrets.AWS_ACCESS_KEY_ID }} \
             --from-literal=AWS__SecretAccessKey=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
@@ -193,7 +200,14 @@ jobs:
             --from-literal=ASPNETCORE_ENVIRONMENT=Production \
             --from-literal=ASPNETCORE_URLS=http://+:8080 \
             --from-literal=ApiCredentials__ClientId=${{ secrets.API_CLIENT_ID }} \
+            --from-literal=Jwt__Issuer=${{ secrets.JWT_ISSUER }} \
             --from-literal=AWS__Region=${{ env.AWS_REGION }} \
+            --from-literal=Mensageria__Topicos__UploadDiagramaConcluido=fase5-upload-diagrama-concluido \
+            --from-literal=Mensageria__Topicos__UploadDiagramaRejeitado=fase5-upload-diagrama-rejeitado \
+            --from-literal=Mensageria__Topicos__ProcessamentoDiagramaIniciado=fase5-processamento-diagrama-iniciado \
+            --from-literal=Mensageria__Topicos__ProcessamentoDiagramaAnalisado=fase5-processamento-diagrama-analisado \
+            --from-literal=Mensageria__Topicos__ProcessamentoDiagramaErro=fase5-processamento-diagrama-erro \
+            --from-literal=Mensageria__Topicos__SolicitarGeracaoRelatorios=fase5-relatorio-solicitar-geracao \
             --from-literal=NEW_RELIC_APP_NAME=RelatorioService \
             --from-literal=NEW_RELIC_APPLICATION_LOGGING_ENABLED=true \
             --from-literal=NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED=true \
@@ -210,10 +224,6 @@ jobs:
       - name: Atualizar tag da imagem no manifesto k8s
         run: |
           sed -i "s|image:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.publish-docker-image.outputs.version_tag }}|g" k8s/${{ env.SERVICE_NAME }}-deployment.yaml
-
-      - name: Aplicar metrics server
-        run: kubectl apply -f k8s/metrics-server.yaml
-        continue-on-error: true
 
       - name: Aplicar manifestos K8s
         run: |

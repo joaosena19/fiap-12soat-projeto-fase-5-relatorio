@@ -1,3 +1,3 @@
 namespace Application.Contracts.Presenters;
 
-public interface IBuscarResultadoDiagramaPresenter : IBasePresenter<Domain.AnaliseDiagrama.Aggregates.ResultadoDiagrama> { }
+public interface IBuscarResultadoDiagramaPresenter : IBasePresenter<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama> { }

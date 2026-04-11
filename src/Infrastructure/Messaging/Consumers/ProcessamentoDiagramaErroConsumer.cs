@@ -1,51 +1,61 @@
-using Application.Contracts.Gateways;
 using Application.Contracts.Messaging.Dtos;
-using Application.Contracts.Monitoramento;
+using Application.Extensions;
+using Infrastructure.Database;
 using Infrastructure.Monitoramento;
+using Infrastructure.Repositories;
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Constants;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Consumers;
 
 /// <summary>
 /// Consumer MassTransit que consome mensagens de processamento com erro e registra a falha.
 /// </summary>
 public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagramaErroDto>
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly AppDbContext _context;
     private readonly ILoggerFactory _loggerFactory;
 
-    public ProcessamentoDiagramaErroConsumer(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+    public ProcessamentoDiagramaErroConsumer(AppDbContext context, ILoggerFactory loggerFactory)
     {
-        _serviceProvider = serviceProvider;
+        _context = context;
         _loggerFactory = loggerFactory;
     }
 
     public async Task Consume(ConsumeContext<ProcessamentoDiagramaErroDto> context)
     {
         var mensagem = context.Message;
-        var logger = new LoggerAdapter<ProcessamentoDiagramaErroConsumer>(_loggerFactory.CreateLogger<ProcessamentoDiagramaErroConsumer>());
-        var gateway = _serviceProvider.GetRequiredService<IResultadoDiagramaGateway>();
-        var metrics = _serviceProvider.GetRequiredService<IMetricsService>();
+        var logger = _loggerFactory.CriarAppLogger<ProcessamentoDiagramaErroConsumer>();
 
-        logger.LogInformation($"Recebida mensagem de erro de processamento para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}", mensagem.AnaliseDiagramaId);
-
-        var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
-
-        if (resultadoDiagrama == null)
+        try
         {
-            logger.LogWarning($"Resultado de diagrama não encontrado para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
-            return;
+            var gateway = new ResultadoDiagramaRepository(_context);
+            var metrics = new NewRelicMetricsService();
+            var messageId = context.MessageId?.ToString() ?? LogNomesValores.Desconhecido;
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.MessageId, messageId).LogInformation($"Recebida mensagem de erro de processamento para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {{{LogNomesPropriedades.MessageId}}}", mensagem.AnaliseDiagramaId, messageId);
+
+            var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
+
+            if (resultadoDiagrama == null)
+            {
+                logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Resultado de diagrama não encontrado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
+                return;
+            }
+
+            resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo);
+
+            await gateway.SalvarAsync(resultadoDiagrama);
+
+            metrics.RegistrarAnaliseComFalha(mensagem.AnaliseDiagramaId, mensagem.Motivo);
+
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Falha registrada para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}. {LogNomesPropriedades.Tentativas}: {{{LogNomesPropriedades.Tentativas}}}", mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.TentativasRealizadas);
         }
-
-        resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo);
-
-        await gateway.SalvarAsync(resultadoDiagrama);
-
-        metrics.RegistrarAnaliseComFalha(mensagem.AnaliseDiagramaId, mensagem.Motivo);
-
-        logger.LogWarning($"Falha registrada para {LogNomesPropriedades.AnaliseDiagramaId} {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}. {LogNomesPropriedades.Tentativas}: {{{LogNomesPropriedades.Tentativas}}}", mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.TentativasRealizadas);
+        catch (Exception ex)
+        {
+            logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogError(ex, "Erro ao consumir mensagem de erro de processamento");
+            throw;
+        }
     }
 }

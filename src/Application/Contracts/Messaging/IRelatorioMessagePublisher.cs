@@ -1,4 +1,4 @@
-using Domain.AnaliseDiagrama.Enums;
+using Domain.ResultadoDiagrama.Enums;
 
 namespace Application.Contracts.Messaging;
 
