@@ -3,6 +3,7 @@ using Application.Contracts.Messaging;
 using Application.Contracts.Messaging.Dtos;
 using Application.Extensions;
 using Domain.ResultadoDiagrama.Entities;
+using Domain.ResultadoDiagrama.Enums;
 using Infrastructure.Database;
 using Infrastructure.Monitoramento;
 using Infrastructure.Repositories;
@@ -47,6 +48,12 @@ public class ProcessamentoDiagramaAnalisadoConsumer : IConsumer<ProcessamentoDia
             {
                 logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Resultado de diagrama não encontrado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}, ignorando", mensagem.AnaliseDiagramaId);
                 return;
+            }
+
+            if (resultadoDiagrama.Status.Valor == StatusAnaliseEnum.Erro)
+            {
+                logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogInformation($"Reprocessamento detectado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. Preparando para nova análise.", mensagem.AnaliseDiagramaId);
+                resultadoDiagrama.PrepararParaReprocessamento();
             }
 
             var analiseResultado = AnaliseResultado.Criar(mensagem.DescricaoAnalise, mensagem.ComponentesIdentificados, mensagem.RiscosArquiteturais, mensagem.RecomendacoesBasicas);

@@ -23,6 +23,8 @@ public class BuscarResultadoDiagramaPresenter : BasePresenter, IBuscarResultadoD
             {
                 Mensagem = erro.Mensagem.Valor,
                 TipoRelatorio = erro.TipoRelatorio.Valor,
+                OrigemErro = erro.OrigemErro.Valor,
+                NumeroTentativa = erro.NumeroTentativa.Valor,
                 DataOcorrencia = erro.DataOcorrencia.Valor
             }).ToList(),
             DataCriacao = resultadoDiagrama.DataCriacao.Valor

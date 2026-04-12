@@ -1,5 +1,6 @@
 using Application.Contracts.Messaging.Dtos;
 using Application.Extensions;
+using Domain.ResultadoDiagrama.Enums;
 using Infrastructure.Database;
 using Infrastructure.Monitoramento;
 using Infrastructure.Repositories;
@@ -44,7 +45,7 @@ public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagrama
                 return;
             }
 
-            resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo);
+            resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo, Enum.TryParse<OrigemErroEnum>(mensagem.OrigemErro, true, out var parsedOrigem) ? parsedOrigem : OrigemErroEnum.Desconhecido, mensagem.TentativasRealizadas);
 
             await gateway.SalvarAsync(resultadoDiagrama);
 

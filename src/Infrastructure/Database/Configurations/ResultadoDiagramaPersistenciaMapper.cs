@@ -102,6 +102,8 @@ internal static class ResultadoDiagramaPersistenciaMapper
     {
         public string Mensagem { get; set; } = string.Empty;
         public TipoRelatorioEnum? TipoRelatorio { get; set; }
+        public OrigemErroEnum? OrigemErro { get; set; }
+        public int? NumeroTentativa { get; set; }
         public DateTimeOffset DataOcorrencia { get; set; }
 
         public static ErroResultadoDiagramaPersistencia Criar(ErroResultadoDiagrama erro)
@@ -110,13 +112,15 @@ internal static class ResultadoDiagramaPersistenciaMapper
             {
                 Mensagem = erro.Mensagem.Valor,
                 TipoRelatorio = erro.TipoRelatorio.Valor,
+                OrigemErro = erro.OrigemErro.Valor,
+                NumeroTentativa = erro.NumeroTentativa.Valor,
                 DataOcorrencia = erro.DataOcorrencia.Valor
             };
         }
 
         public ErroResultadoDiagrama ParaDominio()
         {
-            return ErroResultadoDiagrama.Reidratar(Mensagem, TipoRelatorio, DataOcorrencia);
+            return ErroResultadoDiagrama.Reidratar(Mensagem, TipoRelatorio, OrigemErro, NumeroTentativa, DataOcorrencia);
         }
     }
 
