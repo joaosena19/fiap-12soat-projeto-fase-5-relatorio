@@ -117,6 +117,48 @@ public class ResultadoDiagramaAggregateTests
         resultadoSolicitacao.ShouldBe(ResultadoSolicitacaoGeracaoRelatorioEnum.Concluido);
     }
 
+    [Fact(DisplayName = "Deve retornar análise não disponível quando status é Erro")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void ObterResultadoSolicitacaoGeracaoRelatorio_DeveRetornarAnaliseNaoDisponivel_QuandoStatusErro()
+    {
+        // Arrange
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().ComFalhaProcessamento().Build();
+
+        // Act
+        var resultadoSolicitacao = resultadoDiagrama.ObterResultadoSolicitacaoGeracaoRelatorio(TipoRelatorioEnum.Markdown);
+
+        // Assert
+        resultadoSolicitacao.ShouldBe(ResultadoSolicitacaoGeracaoRelatorioEnum.AnaliseNaoDisponivel);
+    }
+
+    [Fact(DisplayName = "Deve retornar análise não disponível quando status é Recebido")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void ObterResultadoSolicitacaoGeracaoRelatorio_DeveRetornarAnaliseNaoDisponivel_QuandoStatusRecebido()
+    {
+        // Arrange
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().Build();
+
+        // Act
+        var resultadoSolicitacao = resultadoDiagrama.ObterResultadoSolicitacaoGeracaoRelatorio(TipoRelatorioEnum.Markdown);
+
+        // Assert
+        resultadoSolicitacao.ShouldBe(ResultadoSolicitacaoGeracaoRelatorioEnum.AnaliseNaoDisponivel);
+    }
+
+    [Fact(DisplayName = "Deve retornar análise não disponível quando em processamento sem análise")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void ObterResultadoSolicitacaoGeracaoRelatorio_DeveRetornarAnaliseNaoDisponivel_QuandoEmProcessamentoSemAnalise()
+    {
+        // Arrange
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().EmProcessamento().Build();
+
+        // Act
+        var resultadoSolicitacao = resultadoDiagrama.ObterResultadoSolicitacaoGeracaoRelatorio(TipoRelatorioEnum.Markdown);
+
+        // Assert
+        resultadoSolicitacao.ShouldBe(ResultadoSolicitacaoGeracaoRelatorioEnum.AnaliseNaoDisponivel);
+    }
+
     #region PrepararParaReprocessamento
 
     [Fact(DisplayName = "Deve preparar para reprocessamento quando status é Erro")]

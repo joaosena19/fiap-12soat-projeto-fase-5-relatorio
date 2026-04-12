@@ -46,6 +46,25 @@ public class SolicitarGeracaoRelatoriosUseCaseTests
         _fixture.MessagePublisherMock.NaoDeveTerPublicadoSolicitacaoGeracao();
     }
 
+    [Fact(DisplayName = "Deve apresentar erro quando análise não está disponível")]
+    [Trait("UseCase", "SolicitarGeracaoRelatorios")]
+    public async Task ExecutarAsync_DeveApresentarErro_QuandoAnaliseNaoDisponivel()
+    {
+        // Arrange
+        var analiseDiagramaId = Guid.NewGuid();
+        var tiposRelatorio = new[] { TipoRelatorioEnum.Markdown };
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().ComAnaliseDiagramaId(analiseDiagramaId).ComFalhaProcessamento().Build();
+        _fixture.GatewayMock.AoObterPorAnaliseDiagramaId(analiseDiagramaId).Retorna(resultadoDiagrama);
+
+        // Act
+        await _fixture.ExecutarAsync(analiseDiagramaId, tiposRelatorio);
+
+        // Assert
+        _fixture.PresenterMock.DeveTerApresentadoErro(ErrorType.DomainRuleBroken);
+        _fixture.GatewayMock.NaoDeveTerSalvo();
+        _fixture.MessagePublisherMock.NaoDeveTerPublicadoSolicitacaoGeracao();
+    }
+
     [Fact(DisplayName = "Deve aceitar geração quando relatório ainda não foi solicitado")]
     [Trait("UseCase", "SolicitarGeracaoRelatorios")]
     public async Task ExecutarAsync_DeveApresentarSucesso_QuandoRelatorioNaoSolicitadoAntes()

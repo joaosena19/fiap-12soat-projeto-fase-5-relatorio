@@ -29,6 +29,12 @@ public class SolicitarGeracaoRelatoriosUseCase
             if (resultadoDiagrama == null)
                 return;
 
+            if (!resultadoDiagrama.AnaliseDisponivel())
+            {
+                presenter.ApresentarErro("Análise não disponível para este diagrama", ErrorType.DomainRuleBroken);
+                return;
+            }
+
             var resultadoSolicitacao = MontarResultadoSolicitacao(analiseDiagramaId, tiposRelatorio, resultadoDiagrama);
             await PersistirEPublicarSolicitacoesAsync(analiseDiagramaId, resultadoDiagrama, resultadoSolicitacao.Relatorios, gateway, messagePublisher);
             presenter.ApresentarSucesso(resultadoSolicitacao);

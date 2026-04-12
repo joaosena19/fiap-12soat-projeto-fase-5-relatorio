@@ -1,6 +1,7 @@
 using Application.Contracts.Presenters;
 using Application.ResultadoDiagrama.Dtos;
 using Domain.ResultadoDiagrama.Aggregates;
+using Domain.ResultadoDiagrama.Enums;
 
 namespace API.Presenters;
 
@@ -18,11 +19,10 @@ public class ListarResultadosDiagramaPresenter : BasePresenter, IListarResultado
         {
             AnaliseDiagramaId = resultado.AnaliseDiagramaId,
             Status = resultado.Status.Valor,
-            Relatorios = resultado.Relatorios.Select(r => new RelatorioResumoDto
-            {
-                Tipo = r.Tipo.Valor,
-                Status = r.Status.Valor
-            }).ToList(),
+            RelatoriosDisponiveis = resultado.Relatorios
+                .Where(r => r.Status.Valor == StatusRelatorioEnum.Concluido)
+                .Select(r => r.Tipo.Valor.ToString())
+                .ToList(),
             QuantidadeErros = resultado.Erros.Count,
             DataCriacao = resultado.DataCriacao.Valor
         };
