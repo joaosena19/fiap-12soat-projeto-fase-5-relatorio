@@ -17,12 +17,12 @@ public class RelatorioGerado
 
     private RelatorioGerado() { }
 
-    public static RelatorioGerado Criar(TipoRelatorioEnum tipo)
+    public static RelatorioGerado Criar(TipoRelatorioEnum tipo, StatusRelatorioEnum statusInicial = StatusRelatorioEnum.NaoSolicitado)
     {
         return new RelatorioGerado
         {
             Tipo = new TipoRelatorio(tipo),
-            Status = new StatusRelatorio(StatusRelatorioEnum.NaoSolicitado),
+            Status = new StatusRelatorio(statusInicial),
             Conteudos = ConteudosRelatorio.Vazio(),
             DataGeracao = null
         };
@@ -41,7 +41,7 @@ public class RelatorioGerado
 
     public bool PodeGerar()
     {
-        return Status.Valor == StatusRelatorioEnum.NaoSolicitado || Status.Valor == StatusRelatorioEnum.Solicitado || Status.Valor == StatusRelatorioEnum.Erro;
+        return Status.Valor == StatusRelatorioEnum.NaoSolicitado || Status.Valor == StatusRelatorioEnum.Automatico || Status.Valor == StatusRelatorioEnum.Solicitado || Status.Valor == StatusRelatorioEnum.Erro;
     }
 
     public void MarcarSolicitado()

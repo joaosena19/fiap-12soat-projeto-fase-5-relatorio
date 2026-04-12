@@ -70,16 +70,30 @@ public class ResultadoDiagrama
         ObterRelatorio(tipoRelatorio).Concluir(conteudos);
     }
 
-    public void RegistrarFalhaProcessamento(string mensagem)
+    public void RegistrarFalhaProcessamento(string mensagem, OrigemErroEnum? origemErro = null, int? numeroTentativa = null)
     {
         Status = new StatusResultadoDiagrama(StatusAnaliseEnum.Erro);
-        Erros.Add(ErroResultadoDiagrama.Criar(mensagem, null));
+        Erros.Add(ErroResultadoDiagrama.Criar(mensagem, null, origemErro, numeroTentativa));
     }
 
     public void RegistrarFalhaRelatorio(TipoRelatorioEnum tipoRelatorio, string mensagem)
     {
         ObterRelatorio(tipoRelatorio).RegistrarErro();
-        Erros.Add(ErroResultadoDiagrama.Criar(mensagem, tipoRelatorio));
+        Erros.Add(ErroResultadoDiagrama.Criar(mensagem, tipoRelatorio, OrigemErroEnum.GeracaoRelatorio, null));
+    }
+
+    /// <summary>
+    /// Prepara o aggregate para reprocessamento após falha. Reseta relatórios e status, mantendo histórico de erros.
+    /// </summary>
+    /// <exception cref="DomainException">Status atual não permite reprocessamento.</exception>
+    public void PrepararParaReprocessamento()
+    {
+        if (Status.Valor != StatusAnaliseEnum.Erro)
+            throw new DomainException($"Só é possível preparar para reprocessamento quando o status atual for Erro. Status atual: {Status.Valor}");
+
+        AnaliseResultado = null;
+        Relatorios = CriarRelatoriosPadrao();
+        Status = new StatusResultadoDiagrama(StatusAnaliseEnum.EmProcessamento);
     }
 
     public RelatorioGerado ObterRelatorio(TipoRelatorioEnum tipoRelatorio)
@@ -106,7 +120,7 @@ public class ResultadoDiagrama
     private static List<RelatorioGerado> CriarRelatoriosPadrao()
     {
         return Enum.GetValues<TipoRelatorioEnum>()
-            .Select(RelatorioGerado.Criar)
+            .Select(tipo => RelatorioGerado.Criar(tipo, Constants.TiposRelatorioAutomatico.Tipos.Contains(tipo) ? StatusRelatorioEnum.Automatico : StatusRelatorioEnum.NaoSolicitado))
             .ToList();
     }
 }
