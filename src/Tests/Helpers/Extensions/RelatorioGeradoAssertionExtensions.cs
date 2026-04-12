@@ -12,6 +12,14 @@ public static class RelatorioGeradoAssertionExtensions
         relatorio.DataGeracao.ShouldBeNull();
     }
 
+    public static void DeveEstarInicializadoComStatus(this RelatorioGerado relatorio, TipoRelatorioEnum tipo, StatusRelatorioEnum status)
+    {
+        relatorio.Tipo.Valor.ShouldBe(tipo);
+        relatorio.Status.Valor.ShouldBe(status);
+        relatorio.Conteudos.Valores.Count.ShouldBe(0);
+        relatorio.DataGeracao.ShouldBeNull();
+    }
+
     public static void DeveEstarConcluido(this RelatorioGerado relatorio, string chaveConteudo, string valorConteudo)
     {
         relatorio.Status.Valor.ShouldBe(StatusRelatorioEnum.Concluido);

@@ -6,5 +6,7 @@ public class ErroResultadoDiagramaDto
 {
     public string Mensagem { get; set; } = string.Empty;
     public TipoRelatorioEnum? TipoRelatorio { get; set; }
+    public OrigemErroEnum? OrigemErro { get; set; }
+    public int? NumeroTentativa { get; set; }
     public DateTimeOffset DataOcorrencia { get; set; }
 }

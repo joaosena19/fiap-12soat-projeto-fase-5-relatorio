@@ -44,6 +44,32 @@ public class RelatorioGeradoTests
         podeGerar.ShouldBeTrue();
     }
 
+    [Fact(DisplayName = "Deve criar relatório com status Automatico quando informado")]
+    [Trait("Entity", "RelatorioGerado")]
+    public void Criar_DeveCriarComStatusAutomatico_QuandoStatusInicialInformado()
+    {
+        // Act
+        var relatorioGerado = RelatorioGerado.Criar(TipoRelatorioEnum.Json, StatusRelatorioEnum.Automatico);
+
+        // Assert
+        relatorioGerado.Tipo.Valor.ShouldBe(TipoRelatorioEnum.Json);
+        relatorioGerado.Status.Valor.ShouldBe(StatusRelatorioEnum.Automatico);
+    }
+
+    [Fact(DisplayName = "Deve permitir gerar quando status é Automatico")]
+    [Trait("Entity", "RelatorioGerado")]
+    public void PodeGerar_DeveRetornarTrue_QuandoStatusAutomatico()
+    {
+        // Arrange
+        var relatorioGerado = RelatorioGerado.Criar(TipoRelatorioEnum.Json, StatusRelatorioEnum.Automatico);
+
+        // Act
+        var podeGerar = relatorioGerado.PodeGerar();
+
+        // Assert
+        podeGerar.ShouldBeTrue();
+    }
+
     [Fact(DisplayName = "Não deve permitir gerar quando status é concluído")]
     [Trait("Entity", "RelatorioGerado")]
     public void PodeGerar_DeveRetornarFalse_QuandoStatusNaoPermiteGeracao()

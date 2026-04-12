@@ -54,7 +54,7 @@ public class ResultadoDiagramaPersistenciaMapperTests
         var dataOcorrencia = DateTimeOffset.UtcNow;
         var erros = new List<global::Domain.ResultadoDiagrama.Aggregates.ErroResultadoDiagrama>
         {
-            global::Domain.ResultadoDiagrama.Aggregates.ErroResultadoDiagrama.Reidratar("Falha ao gerar relatório", TipoRelatorioEnum.Pdf, dataOcorrencia)
+            global::Domain.ResultadoDiagrama.Aggregates.ErroResultadoDiagrama.Reidratar("Falha ao gerar relatório", TipoRelatorioEnum.Pdf, OrigemErroEnum.GeracaoRelatorio, null, dataOcorrencia)
         };
 
         // Act

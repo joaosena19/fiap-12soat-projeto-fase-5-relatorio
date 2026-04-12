@@ -7,4 +7,5 @@ public interface IResultadoDiagramaGateway
 {
     Task<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama> SalvarAsync(Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama resultadoDiagrama);
     Task<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama?> ObterPorAnaliseDiagramaIdAsync(Guid analiseDiagramaId);
+    Task<IReadOnlyCollection<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama>> ListarAsync();
 }

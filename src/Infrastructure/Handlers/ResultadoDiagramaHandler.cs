@@ -11,6 +11,14 @@ public class ResultadoDiagramaHandler : BaseHandler
 {
     public ResultadoDiagramaHandler(ILoggerFactory loggerFactory) : base(loggerFactory) { }
 
+    public async Task ListarResultadosDiagramaAsync(IResultadoDiagramaGateway gateway, IListarResultadosDiagramaPresenter presenter)
+    {
+        var useCase = new ListarResultadosDiagramaUseCase();
+        var logger = CriarLoggerPara<ListarResultadosDiagramaUseCase>();
+
+        await useCase.ExecutarAsync(gateway, presenter, logger);
+    }
+
     public async Task BuscarPorAnaliseDiagramaIdAsync(Guid analiseDiagramaId, IResultadoDiagramaGateway gateway, IBuscarResultadoDiagramaPresenter presenter)
     {
         var useCase = new BuscarResultadoDiagramaPorIdUseCase();
