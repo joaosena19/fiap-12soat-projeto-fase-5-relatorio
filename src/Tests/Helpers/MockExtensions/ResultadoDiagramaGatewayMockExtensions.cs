@@ -14,6 +14,11 @@ public static class ResultadoDiagramaGatewayMockExtensions
         return new SalvarSetup(mock);
     }
 
+    public static ListarSetup AoListar(this Mock<IResultadoDiagramaGateway> mock)
+    {
+        return new ListarSetup(mock);
+    }
+
     public static void DeveTerSalvo(this Mock<IResultadoDiagramaGateway> mock)
     {
         mock.Verify(x => x.SalvarAsync(It.IsAny<ResultadoDiagrama>()), Times.AtLeastOnce);
@@ -73,6 +78,23 @@ public static class ResultadoDiagramaGatewayMockExtensions
         public void LancaExcecao(Exception excecao)
         {
             _mock.Setup(x => x.SalvarAsync(It.IsAny<ResultadoDiagrama>())).ThrowsAsync(excecao);
+        }
+    }
+
+    public sealed class ListarSetup
+    {
+        private readonly Mock<IResultadoDiagramaGateway> _mock;
+
+        public ListarSetup(Mock<IResultadoDiagramaGateway> mock) => _mock = mock;
+
+        public void Retorna(IReadOnlyCollection<ResultadoDiagrama> resultados)
+        {
+            _mock.Setup(x => x.ListarAsync()).ReturnsAsync(resultados);
+        }
+
+        public void LancaExcecao(Exception excecao)
+        {
+            _mock.Setup(x => x.ListarAsync()).ThrowsAsync(excecao);
         }
     }
 }

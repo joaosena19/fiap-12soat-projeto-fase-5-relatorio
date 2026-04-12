@@ -116,4 +116,54 @@ public class ResultadoDiagramaAggregateTests
         // Assert
         resultadoSolicitacao.ShouldBe(ResultadoSolicitacaoGeracaoRelatorioEnum.Concluido);
     }
+
+    #region PrepararParaReprocessamento
+
+    [Fact(DisplayName = "Deve preparar para reprocessamento quando status é Erro")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DeveResetarRelatoriosEStatus_QuandoStatusErro()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().ComFalhaProcessamento().Build();
+
+        // Act
+        resultado.PrepararParaReprocessamento();
+
+        // Assert
+        resultado.Status.Valor.ShouldBe(StatusAnaliseEnum.EmProcessamento);
+        resultado.AnaliseResultado.ShouldBeNull();
+        resultado.Relatorios.Count.ShouldBe(Enum.GetValues<TipoRelatorioEnum>().Length);
+        resultado.Relatorios.First(r => r.Tipo.Valor == TipoRelatorioEnum.Json).Status.Valor.ShouldBe(StatusRelatorioEnum.Automatico);
+        resultado.Relatorios.Where(r => r.Tipo.Valor != TipoRelatorioEnum.Json).All(r => r.Status.Valor == StatusRelatorioEnum.NaoSolicitado).ShouldBeTrue();
+        resultado.Erros.ShouldNotBeEmpty();
+    }
+
+    [Fact(DisplayName = "Não deve preparar para reprocessamento quando status não é Erro")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DeveLancarExcecao_QuandoStatusNaoErro()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().Build();
+        Action acao = () => resultado.PrepararParaReprocessamento();
+
+        // Act & Assert
+        acao.DeveLancarExcecaoDeValidacao("status atual for Erro");
+    }
+
+    [Fact(DisplayName = "Deve manter erros históricos ao preparar para reprocessamento")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DeveManterHistoricoErros_QuandoStatusErro()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().ComFalhaProcessamento().Build();
+        var quantidadeErrosAntes = resultado.Erros.Count;
+
+        // Act
+        resultado.PrepararParaReprocessamento();
+
+        // Assert
+        resultado.Erros.Count.ShouldBe(quantidadeErrosAntes);
+    }
+
+    #endregion
 }

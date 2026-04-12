@@ -40,7 +40,8 @@ public static class ResultadoDiagramaAssertionExtensions
         resultado.DeveEstarComStatus(StatusAnaliseEnum.Recebido);
         resultado.AnaliseResultado.ShouldBeNull();
         resultado.Relatorios.Count.ShouldBe(Enum.GetValues<TipoRelatorioEnum>().Length);
-        resultado.Relatorios.All(item => item.Status.Valor == StatusRelatorioEnum.NaoSolicitado).ShouldBeTrue();
+        resultado.Relatorios.Where(r => r.Tipo.Valor == TipoRelatorioEnum.Json).All(r => r.Status.Valor == StatusRelatorioEnum.Automatico).ShouldBeTrue();
+        resultado.Relatorios.Where(r => r.Tipo.Valor != TipoRelatorioEnum.Json).All(r => r.Status.Valor == StatusRelatorioEnum.NaoSolicitado).ShouldBeTrue();
         resultado.Erros.ShouldBeEmpty();
         resultado.DataCriacao.Valor.ShouldNotBe(default);
     }
@@ -63,5 +64,17 @@ public static class ResultadoDiagramaAssertionExtensions
     {
         resultado.Erros.ShouldNotBeEmpty();
         resultado.Erros.Any(item => item.TipoRelatorio.Valor == tipoRelatorio).ShouldBeTrue();
+    }
+
+    public static void DeveTerErroComOrigem(this ResultadoDiagrama resultado, OrigemErroEnum origemEsperada)
+    {
+        resultado.Erros.ShouldNotBeEmpty();
+        resultado.Erros.Any(e => e.OrigemErro.Valor == origemEsperada).ShouldBeTrue();
+    }
+
+    public static void DeveTerErroComTentativa(this ResultadoDiagrama resultado, int tentativaEsperada)
+    {
+        resultado.Erros.ShouldNotBeEmpty();
+        resultado.Erros.Any(e => e.NumeroTentativa.Valor == tentativaEsperada).ShouldBeTrue();
     }
 }
