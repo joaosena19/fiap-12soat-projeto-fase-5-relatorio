@@ -107,6 +107,9 @@ public class ResultadoDiagrama
 
     public ResultadoSolicitacaoGeracaoRelatorioEnum ObterResultadoSolicitacaoGeracaoRelatorio(TipoRelatorioEnum tipoRelatorio)
     {
+        if (!AnaliseDisponivel())
+            return ResultadoSolicitacaoGeracaoRelatorioEnum.AnaliseNaoDisponivel;
+
         var relatorio = ObterRelatorio(tipoRelatorio);
 
         return relatorio.Status.Valor switch
