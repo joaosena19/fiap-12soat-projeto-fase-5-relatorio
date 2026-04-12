@@ -19,4 +19,5 @@ public static class LogNomesPropriedades
     public const string MessageId = "MessageId";
     public const string DuracaoMs = "DuracaoMs";
     public const string Timestamp = "Timestamp";
+    public const string AppName = "appName";
 }
