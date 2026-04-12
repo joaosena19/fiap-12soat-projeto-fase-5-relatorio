@@ -30,6 +30,25 @@ public class RelatorioController : BaseController
     }
 
     /// <summary>
+    /// Lista todos os resultados de diagramas com status detalhado por relatório.
+    /// </summary>
+    /// <returns>Lista de resultados com status por tipo de relatório</returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(List<RetornoListagemResultadoDiagramaDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ListarResultados()
+    {
+        var gateway = new ResultadoDiagramaRepository(_context);
+        var presenter = new ListarResultadosDiagramaPresenter();
+        var handler = new ResultadoDiagramaHandler(_loggerFactory);
+
+        await handler.ListarResultadosDiagramaAsync(gateway, presenter);
+
+        return presenter.ObterResultado();
+    }
+
+    /// <summary>
     /// Busca uma análise de diagrama pelo AnaliseDiagramaId.
     /// </summary>
     /// <returns>Dados dos relatórios da análise</returns>

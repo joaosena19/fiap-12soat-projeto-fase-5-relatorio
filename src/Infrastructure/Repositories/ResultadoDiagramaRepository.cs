@@ -31,4 +31,11 @@ public class ResultadoDiagramaRepository : IResultadoDiagramaGateway
     {
         return await _context.ResultadosDiagrama.FirstOrDefaultAsync(item => item.AnaliseDiagramaId == analiseDiagramaId);
     }
+
+    public async Task<IReadOnlyCollection<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama>> ListarAsync()
+    {
+        return await _context.ResultadosDiagrama
+            .OrderByDescending(r => r.DataCriacao)
+            .ToListAsync();
+    }
 }
