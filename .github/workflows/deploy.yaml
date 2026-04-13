@@ -206,6 +206,7 @@ jobs:
             --from-literal=Jwt__Issuer=UploadDiagramaApi \
             --from-literal=Jwt__Audience=AuthorizedServices \
             --from-literal=AWS__Region=${{ env.AWS_REGION }} \
+            --from-literal=AWS__S3__BucketName="$S3_BUCKET_NAME" \
             --from-literal=Mensageria__Topicos__UploadDiagramaConcluido=fase5-upload-diagrama-concluido \
             --from-literal=Mensageria__Topicos__UploadDiagramaRejeitado=fase5-upload-diagrama-rejeitado \
             --from-literal=Mensageria__Topicos__ProcessamentoDiagramaIniciado=fase5-processamento-diagrama-iniciado \

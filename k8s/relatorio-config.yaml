@@ -14,6 +14,7 @@ data:
   ApiCredentials__ClientId: "admin"
 
   AWS__Region: "us-east-1"
+  AWS__S3__BucketName: "__S3_BUCKET_NAME__"
 
   NEW_RELIC_APP_NAME: "RelatorioService"
   NEW_RELIC_APPLICATION_LOGGING_ENABLED: "true"

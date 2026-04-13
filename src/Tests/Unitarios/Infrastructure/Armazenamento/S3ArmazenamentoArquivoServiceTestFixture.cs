@@ -7,6 +7,7 @@ namespace Tests.Infrastructure.Armazenamento;
 
 public class S3ArmazenamentoArquivoServiceTestFixture
 {
+    public const string UrlPreAssinadaPadrao = "https://meu-bucket-teste.s3.amazonaws.com/relatorios/presigned?X-Amz-Signature=abc123";
     public Mock<IAmazonS3> S3ClientMock { get; } = new();
     public IArmazenamentoArquivoService Service { get; }
 
@@ -17,6 +18,7 @@ public class S3ArmazenamentoArquivoServiceTestFixture
             .Build();
 
         var loggerFactoryMock = LoggerFactoryMockExtensions.CriarLoggerFactoryMock();
+        S3ClientMock.AoGerarUrlPreAssinada(UrlPreAssinadaPadrao);
         Service = new S3ArmazenamentoArquivoService(S3ClientMock.Object, configuration, loggerFactoryMock.Object);
     }
 

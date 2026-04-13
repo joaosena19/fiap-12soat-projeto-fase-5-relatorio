@@ -7,6 +7,11 @@ public static class AmazonS3MockExtensions
 {
     public static S3PutObjectSetup AoSalvarObjeto(this Mock<IAmazonS3> mock) => new(mock);
 
+    public static void AoGerarUrlPreAssinada(this Mock<IAmazonS3> mock, string urlRetorno = "https://meu-bucket-teste.s3.amazonaws.com/relatorios/presigned")
+    {
+        mock.Setup(x => x.GetPreSignedURL(It.IsAny<GetPreSignedUrlRequest>())).Returns(urlRetorno);
+    }
+
     public static void DeveTerSalvadoObjeto(this Mock<IAmazonS3> mock, Action<PutObjectRequest>? validacao = null)
     {
         if (validacao is not null)
