@@ -43,7 +43,7 @@ public class RelatorioMarkdownStrategy : BaseRelatorioStrategy
 
         try
         {
-            var url = await _armazenamentoArquivoService.ArmazenarAsync(resultadoDiagrama.AnaliseDiagramaId, markdownBytes, nomeArquivo, "text/markdown");
+            var url = await _armazenamentoArquivoService.ArmazenarAsync(resultadoDiagrama.AnaliseDiagramaId, markdownBytes, nomeArquivo, "text/markdown; charset=utf-8");
 
             return ConteudosRelatorio.Vazio()
                 .Adicionar(ConteudoRelatorioChaves.InlineMarkdown, markdownString)

@@ -21,7 +21,7 @@ public class RelatorioMarkdownStrategyTests
         // Arrange
         var resultadoDiagrama = new ResultadoDiagramaBuilder().Analisado().Build();
         var urlEsperada = "https://s3.amazonaws.com/bucket/relatorio.md";
-        _fixture.ArmazenamentoMock.AoArmazenar().Retorna(urlEsperada, contentType: "text/markdown");
+        _fixture.ArmazenamentoMock.AoArmazenar().Retorna(urlEsperada, contentType: "text/markdown; charset=utf-8");
 
         // Act
         var conteudos = await _fixture.Strategy.GerarAsync(resultadoDiagrama);
@@ -38,7 +38,7 @@ public class RelatorioMarkdownStrategyTests
         var url = conteudos.ObterValor("url");
         url.ShouldBe(urlEsperada);
 
-        _fixture.ArmazenamentoMock.DeveTerArmazenado(contentType: "text/markdown");
+        _fixture.ArmazenamentoMock.DeveTerArmazenado(contentType: "text/markdown; charset=utf-8");
     }
 
     [Fact(DisplayName = "GerarAsync deve propagar exceção quando armazenamento falha")]
