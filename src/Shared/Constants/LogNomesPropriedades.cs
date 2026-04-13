@@ -11,6 +11,7 @@ public static class LogNomesPropriedades
     public const string TipoRelatorio = "TipoRelatorio";
     public const string Extensao = "Extensao";
     public const string Motivo = "Motivo";
+    public const string OrigemErro = "OrigemErro";
     public const string Tentativas = "Tentativas";
     public const string Tamanho = "Tamanho";
     public const string QuantidadeTipos = "QuantidadeTipos";
@@ -19,4 +20,5 @@ public static class LogNomesPropriedades
     public const string MessageId = "MessageId";
     public const string DuracaoMs = "DuracaoMs";
     public const string Timestamp = "Timestamp";
+    public const string AppName = "appName";
 }

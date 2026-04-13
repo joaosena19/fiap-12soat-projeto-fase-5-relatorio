@@ -32,12 +32,26 @@ public class ResultadoDiagramaAggregateTests
         resultadoDiagrama.DeveEstarComStatus(StatusAnaliseEnum.EmProcessamento);
     }
 
+    [Fact(DisplayName = "Deve ser idempotente ao marcar em processamento quando já está em processamento")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void MarcarEmProcessamento_DeveSerIdempotente_QuandoJaEmProcessamento()
+    {
+        // Arrange
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().EmProcessamento().Build();
+
+        // Act
+        resultadoDiagrama.MarcarEmProcessamento();
+
+        // Assert
+        resultadoDiagrama.DeveEstarComStatus(StatusAnaliseEnum.EmProcessamento);
+    }
+
     [Fact(DisplayName = "Deve lançar exceção ao marcar em processamento em estado inválido")]
     [Trait("Aggregate", "ResultadoDiagrama")]
     public void MarcarEmProcessamento_DeveLancarExcecao_QuandoStatusNaoRecebido()
     {
         // Arrange
-        var resultadoDiagrama = new ResultadoDiagramaBuilder().EmProcessamento().Build();
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().Analisado().Build();
         Action acao = () => resultadoDiagrama.MarcarEmProcessamento();
 
         // Act & Assert

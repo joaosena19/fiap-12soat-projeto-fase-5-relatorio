@@ -39,7 +39,7 @@ public class UploadDiagramaRejeitadoConsumer : IConsumer<UploadDiagramaRejeitado
 
             await gateway.SalvarAsync(resultadoDiagrama);
 
-            metrics.RegistrarAnaliseComFalha(mensagem.AnaliseDiagramaId, mensagem.MotivoRejeicao);
+            metrics.RegistrarRejeicaoUploadRecebida(mensagem.AnaliseDiagramaId, mensagem.MotivoRejeicao);
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).ComPropriedade(LogNomesPropriedades.Motivo, mensagem.MotivoRejeicao).LogInformation($"Rejeição de upload registrada para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}", mensagem.AnaliseDiagramaId, mensagem.MotivoRejeicao);
         }
