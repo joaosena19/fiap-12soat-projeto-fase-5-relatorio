@@ -24,9 +24,9 @@ public class S3ArmazenamentoArquivoServiceTests
         acao.ShouldThrow<InvalidOperationException>();
     }
 
-    [Fact(DisplayName = "Deve armazenar arquivo e retornar URL S3 quando upload bem-sucedido")]
+    [Fact(DisplayName = "Deve armazenar arquivo e retornar URL pré-assinada quando upload bem-sucedido")]
     [Trait("Infrastructure", "S3ArmazenamentoArquivoService")]
-    public async Task ArmazenarAsync_DeveRetornarUrlS3_QuandoUploadBemSucedido()
+    public async Task ArmazenarAsync_DeveRetornarUrlPreAssinada_QuandoUploadBemSucedido()
     {
         // Arrange
         var analiseDiagramaId = Guid.NewGuid();
@@ -39,8 +39,8 @@ public class S3ArmazenamentoArquivoServiceTests
 
         // Assert
         url.ShouldNotBeNullOrWhiteSpace();
-        url.ShouldContain("meu-bucket-teste");
-        url.ShouldContain(nomeArquivo);
+        url.ShouldStartWith("https://");
+        url.ShouldBe(S3ArmazenamentoArquivoServiceTestFixture.UrlPreAssinadaPadrao);
     }
 
     [Fact(DisplayName = "Deve propagar exceção quando upload S3 falha")]

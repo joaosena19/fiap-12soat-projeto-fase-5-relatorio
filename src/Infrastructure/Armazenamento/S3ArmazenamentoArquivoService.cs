@@ -17,12 +17,14 @@ public class S3ArmazenamentoArquivoService : IArmazenamentoArquivoService
 {
     private readonly IAmazonS3 _s3Client;
     private readonly string _bucketName;
+    private readonly int _presignedUrlExpiracaoDias;
     private readonly IAppLogger _logger;
 
     public S3ArmazenamentoArquivoService(IAmazonS3 s3Client, IConfiguration configuration, ILoggerFactory loggerFactory)
     {
         _s3Client = s3Client;
         _bucketName = configuration["AWS:S3:BucketName"] ?? throw new InvalidOperationException("Configuração do bucket S3 não encontrada");
+        _presignedUrlExpiracaoDias = int.TryParse(configuration["AWS:S3:PresignedUrlExpiracaoDias"], out var dias) ? dias : 7;
         _logger = loggerFactory.CriarAppLogger<S3ArmazenamentoArquivoService>();
     }
 
@@ -51,8 +53,17 @@ public class S3ArmazenamentoArquivoService : IArmazenamentoArquivoService
             throw;
         }
 
+        var presignRequest = new GetPreSignedUrlRequest
+        {
+            BucketName = _bucketName,
+            Key = key,
+            Expires = DateTime.UtcNow.AddDays(_presignedUrlExpiracaoDias)
+        };
+
+        var urlPublica = _s3Client.GetPreSignedURL(presignRequest);
+
         _logger.LogDebug($"Armazenamento do relatório concluído para {{{LogNomesPropriedades.AnaliseDiagramaId}}} em {{{LogNomesPropriedades.DuracaoMs}}}ms com {{{LogNomesPropriedades.Tamanho}}} bytes", analiseDiagramaId, cronometro.ElapsedMilliseconds, conteudo.Length);
 
-        return $"s3://{_bucketName}/{key}";
+        return urlPublica;
     }
 }
