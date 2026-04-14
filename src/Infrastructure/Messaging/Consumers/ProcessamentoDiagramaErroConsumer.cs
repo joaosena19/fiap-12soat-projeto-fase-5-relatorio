@@ -45,11 +45,19 @@ public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagrama
                 return;
             }
 
-            resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo, Enum.TryParse<OrigemErroEnum>(mensagem.OrigemErro, true, out var parsedOrigem) ? parsedOrigem : OrigemErroEnum.Desconhecido, mensagem.TentativasRealizadas);
+            var parsedOrigem = Enum.TryParse<OrigemErroEnum>(mensagem.OrigemErro, true, out var origem) ? origem : OrigemErroEnum.Desconhecido;
+
+            if (mensagem.Rejeitado)
+                resultadoDiagrama.RegistrarRejeicao(mensagem.Motivo, parsedOrigem, mensagem.TentativasRealizadas);
+            else
+                resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo, parsedOrigem, mensagem.TentativasRealizadas);
 
             await gateway.SalvarAsync(resultadoDiagrama);
 
-            metrics.RegistrarFalhaProcessamentoRecebida(mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.OrigemErro, mensagem.TentativasRealizadas);
+            if (mensagem.Rejeitado)
+                metrics.RegistrarRejeicaoProcessamentoRecebida(mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.OrigemErro, mensagem.TentativasRealizadas);
+            else
+                metrics.RegistrarFalhaProcessamentoRecebida(mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.OrigemErro, mensagem.TentativasRealizadas);
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Falha registrada para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}. {LogNomesPropriedades.Tentativas}: {{{LogNomesPropriedades.Tentativas}}}", mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.TentativasRealizadas);
         }

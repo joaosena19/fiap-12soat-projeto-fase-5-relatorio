@@ -79,6 +79,12 @@ public class ResultadoDiagrama
         Erros.Add(ErroResultadoDiagrama.Criar(mensagem, null, origemErro, numeroTentativa));
     }
 
+    public void RegistrarRejeicao(string mensagem, OrigemErroEnum? origemErro = null, int? numeroTentativa = null)
+    {
+        Status = new StatusResultadoDiagrama(StatusAnaliseEnum.Rejeitado);
+        Erros.Add(ErroResultadoDiagrama.Criar(mensagem, null, origemErro, numeroTentativa));
+    }
+
     public void RegistrarFalhaRelatorio(TipoRelatorioEnum tipoRelatorio, string mensagem)
     {
         ObterRelatorio(tipoRelatorio).RegistrarErro();

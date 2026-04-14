@@ -27,6 +27,12 @@ public static class ResultadoDiagramaAssertionExtensions
         resultado.Erros.ShouldNotBeEmpty();
     }
 
+    public static void DeveEstarRejeitado(this ResultadoDiagrama resultado)
+    {
+        resultado.Status.Valor.ShouldBe(StatusAnaliseEnum.Rejeitado);
+        resultado.Erros.ShouldNotBeEmpty();
+    }
+
     public static void DeveConterErroComMensagem(this ResultadoDiagrama resultado, string mensagemEsperada)
     {
         resultado.DeveEstarComErro();

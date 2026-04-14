@@ -14,6 +14,7 @@ public class NewRelicMetricsService : IMetricsService
     private const string EventoAnaliseRecebida = "AnaliseDiagramaRecebida";
     private const string EventoAnaliseConcluida = "AnaliseDiagramaConcluida";
     private const string EventoFalhaProcessamentoRecebida = "FalhaProcessamentoRecebida";
+    private const string EventoRejeicaoProcessamentoRecebida = "RejeicaoProcessamentoRecebida";
     private const string EventoRejeicaoUploadRecebida = "RejeicaoUploadRecebida";
     private const string EventoRelatorioGerado = "RelatorioGerado";
     private const string EventoRelatorioComFalha = "RelatorioComFalha";
@@ -38,6 +39,17 @@ public class NewRelicMetricsService : IMetricsService
     public void RegistrarFalhaProcessamentoRecebida(Guid analiseDiagramaId, string motivo, string? origemErro, int tentativasRealizadas)
     {
         RegistrarEvento(EventoFalhaProcessamentoRecebida, new Dictionary<string, object>
+        {
+            { LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId },
+            { LogNomesPropriedades.Motivo, motivo },
+            { LogNomesPropriedades.OrigemErro, origemErro ?? "Desconhecido" },
+            { LogNomesPropriedades.Tentativas, tentativasRealizadas }
+        });
+    }
+
+    public void RegistrarRejeicaoProcessamentoRecebida(Guid analiseDiagramaId, string motivo, string? origemErro, int tentativasRealizadas)
+    {
+        RegistrarEvento(EventoRejeicaoProcessamentoRecebida, new Dictionary<string, object>
         {
             { LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId },
             { LogNomesPropriedades.Motivo, motivo },

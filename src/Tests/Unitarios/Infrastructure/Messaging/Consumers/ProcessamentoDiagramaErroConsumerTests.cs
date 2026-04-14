@@ -23,6 +23,28 @@ public class ProcessamentoDiagramaErroConsumerTests
 
         // Assert
         resultado.DeveConterErroComMensagem("Timeout no processamento de LLM");
+        resultado.DeveEstarComErro();
+    }
+
+    [Fact(DisplayName = "Deve registrar rejeição quando mensagem indicar rejeição")]
+    [Trait("Infrastructure", "ProcessamentoDiagramaErroConsumer")]
+    public async Task Consume_DeveRegistrarRejeicao_QuandoMensagemIndicarRejeicao()
+    {
+        // Arrange
+        var analiseDiagramaId = Guid.NewGuid();
+        using var fixture = new ResultadoDiagramaConsumerTestFixture()
+            .ComResultadoDiagrama(new ResultadoDiagramaBuilder().ComAnaliseDiagramaId(analiseDiagramaId).EmProcessamento().Build());
+        var consumer = fixture.CriarConsumerErro();
+        var mensagem = new ProcessamentoDiagramaErroDtoBuilder().ComAnaliseDiagramaId(analiseDiagramaId).ComMotivo("Não é diagrama").Rejeitado().Build();
+        var contexto = ResultadoDiagramaConsumerTestFixture.CriarContextoErro(mensagem, Guid.NewGuid());
+
+        // Act
+        await consumer.Consume(contexto.Object);
+        var resultado = await fixture.Contexto.ResultadosDiagrama.FirstAsync(item => item.AnaliseDiagramaId == analiseDiagramaId);
+
+        // Assert
+        resultado.DeveEstarRejeitado();
+        resultado.Erros[^1].Mensagem.Valor.ShouldBe("Não é diagrama");
     }
 
     [Fact(DisplayName = "Não deve alterar estado quando resultado não existir")]
