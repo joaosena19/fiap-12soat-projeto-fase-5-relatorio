@@ -14,6 +14,7 @@ public class ResultadoDiagramaBuilder
     private readonly List<TipoRelatorioEnum> _relatoriosComErro = [];
     private bool _emProcessamento;
     private bool _comFalhaProcessamento;
+    private bool _rejeitado;
 
     public ResultadoDiagramaBuilder ComAnaliseDiagramaId(Guid analiseDiagramaId)
     {
@@ -42,6 +43,12 @@ public class ResultadoDiagramaBuilder
     public ResultadoDiagramaBuilder ComFalhaProcessamento()
     {
         _comFalhaProcessamento = true;
+        return this;
+    }
+
+    public ResultadoDiagramaBuilder Rejeitado()
+    {
+        _rejeitado = true;
         return this;
     }
 
@@ -79,7 +86,7 @@ public class ResultadoDiagramaBuilder
     {
         var resultadoDiagrama = ResultadoDiagrama.Criar(_analiseDiagramaId);
 
-        if (_emProcessamento || _analiseResultado != null || _comFalhaProcessamento)
+        if (_emProcessamento || _analiseResultado != null || _comFalhaProcessamento || _rejeitado)
             resultadoDiagrama.MarcarEmProcessamento();
 
         if (_analiseResultado != null)
@@ -87,6 +94,9 @@ public class ResultadoDiagramaBuilder
 
         if (_comFalhaProcessamento)
             resultadoDiagrama.RegistrarFalhaProcessamento("Falha de processamento simulada");
+
+        if (_rejeitado)
+            resultadoDiagrama.RegistrarRejeicao("Imagem rejeitada pela LLM", OrigemErroEnum.LlmValidacao, 1);
 
         foreach (var tipoRelatorio in _relatoriosSolicitados)
             resultadoDiagrama.MarcarRelatorioSolicitado(tipoRelatorio);

@@ -89,6 +89,21 @@ public class ResultadoDiagramaAggregateTests
         resultadoDiagrama.DeveEstarComErroSemRelatorio();
     }
 
+    [Fact(DisplayName = "Deve registrar rejeição com status Rejeitado")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void RegistrarRejeicao_DeveMarcarStatusRejeitado_QuandoChamado()
+    {
+        // Arrange
+        var resultadoDiagrama = new ResultadoDiagramaBuilder().EmProcessamento().Build();
+
+        // Act
+        resultadoDiagrama.RegistrarRejeicao("Não é diagrama", OrigemErroEnum.LlmValidacao, 1);
+
+        // Assert
+        resultadoDiagrama.DeveEstarRejeitado();
+        resultadoDiagrama.DeveTerErroComOrigem(OrigemErroEnum.LlmValidacao);
+    }
+
     [Fact(DisplayName = "Deve retornar aceito para geração para relatório não solicitado")]
     [Trait("Aggregate", "ResultadoDiagrama")]
     public void ObterResultadoSolicitacaoGeracaoRelatorio_DeveRetornarAceito_QuandoRelatorioNaoSolicitado()
@@ -200,6 +215,18 @@ public class ResultadoDiagramaAggregateTests
     {
         // Arrange
         var resultado = new ResultadoDiagramaBuilder().Build();
+        Action acao = () => resultado.PrepararParaReprocessamento();
+
+        // Act & Assert
+        acao.DeveLancarExcecaoDeValidacao("status atual for Erro");
+    }
+
+    [Fact(DisplayName = "Não deve preparar para reprocessamento quando status é Rejeitado")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DeveLancarExcecao_QuandoStatusRejeitado()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().Rejeitado().Build();
         Action acao = () => resultado.PrepararParaReprocessamento();
 
         // Act & Assert

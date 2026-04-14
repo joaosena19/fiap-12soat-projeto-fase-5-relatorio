@@ -36,11 +36,15 @@ public class ProcessamentoDiagramaErroDtoBuilder
     private Guid _analiseDiagramaId = Guid.NewGuid();
     private string _motivo = "Timeout no processamento de LLM";
     private int _tentativasRealizadas = 3;
+    private bool _rejeitado;
+    private bool _podeRetentar = true;
     private DateTimeOffset _dataErro = DateTimeOffset.UtcNow;
 
     public ProcessamentoDiagramaErroDtoBuilder ComAnaliseDiagramaId(Guid valor) { _analiseDiagramaId = valor; return this; }
     public ProcessamentoDiagramaErroDtoBuilder ComMotivo(string valor) { _motivo = valor; return this; }
     public ProcessamentoDiagramaErroDtoBuilder ComTentativas(int valor) { _tentativasRealizadas = valor; return this; }
+    public ProcessamentoDiagramaErroDtoBuilder Rejeitado() { _rejeitado = true; _podeRetentar = false; return this; }
+    public ProcessamentoDiagramaErroDtoBuilder SemRetentativa() { _podeRetentar = false; return this; }
 
     public ProcessamentoDiagramaErroDto Build() => new()
     {
@@ -48,6 +52,8 @@ public class ProcessamentoDiagramaErroDtoBuilder
         AnaliseDiagramaId = _analiseDiagramaId,
         Motivo = _motivo,
         TentativasRealizadas = _tentativasRealizadas,
+        Rejeitado = _rejeitado,
+        PodeRetentar = _podeRetentar,
         DataErro = _dataErro
     };
 }

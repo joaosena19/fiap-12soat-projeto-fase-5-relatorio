@@ -5,5 +5,6 @@ public enum StatusAnaliseEnum
     Recebido,
     EmProcessamento,
     Analisado,
-    Erro
+    Erro,
+    Rejeitado
 }

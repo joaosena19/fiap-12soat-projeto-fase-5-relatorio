@@ -45,7 +45,12 @@ public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagrama
                 return;
             }
 
-            resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo, Enum.TryParse<OrigemErroEnum>(mensagem.OrigemErro, true, out var parsedOrigem) ? parsedOrigem : OrigemErroEnum.Desconhecido, mensagem.TentativasRealizadas);
+            var parsedOrigem = Enum.TryParse<OrigemErroEnum>(mensagem.OrigemErro, true, out var origem) ? origem : OrigemErroEnum.Desconhecido;
+
+            if (mensagem.Rejeitado)
+                resultadoDiagrama.RegistrarRejeicao(mensagem.Motivo, parsedOrigem, mensagem.TentativasRealizadas);
+            else
+                resultadoDiagrama.RegistrarFalhaProcessamento(mensagem.Motivo, parsedOrigem, mensagem.TentativasRealizadas);
 
             await gateway.SalvarAsync(resultadoDiagrama);
 
