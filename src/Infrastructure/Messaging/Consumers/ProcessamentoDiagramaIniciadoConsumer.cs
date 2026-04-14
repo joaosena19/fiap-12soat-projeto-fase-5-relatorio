@@ -4,7 +4,9 @@ using Infrastructure.Database;
 using Infrastructure.Monitoramento;
 using Infrastructure.Repositories;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.Constants;
 
 namespace Infrastructure.Messaging.Consumers;
@@ -41,7 +43,15 @@ public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiag
             var resultadoDiagrama = resultadoExistente ?? Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
             resultadoDiagrama.MarcarEmProcessamento();
 
-            await gateway.SalvarAsync(resultadoDiagrama);
+            try
+            {
+                await gateway.SalvarAsync(resultadoDiagrama);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+            {
+                logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning("Mensagem duplicada detectada (constraint violation), ignorando para {AnaliseDiagramaId}", mensagem.AnaliseDiagramaId);
+                return;
+            }
 
             metrics.RegistrarAnaliseRecebida(mensagem.AnaliseDiagramaId, mensagem.Extensao);
 
