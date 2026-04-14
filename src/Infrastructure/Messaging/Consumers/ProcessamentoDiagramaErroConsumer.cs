@@ -54,7 +54,10 @@ public class ProcessamentoDiagramaErroConsumer : IConsumer<ProcessamentoDiagrama
 
             await gateway.SalvarAsync(resultadoDiagrama);
 
-            metrics.RegistrarFalhaProcessamentoRecebida(mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.OrigemErro, mensagem.TentativasRealizadas);
+            if (mensagem.Rejeitado)
+                metrics.RegistrarRejeicaoProcessamentoRecebida(mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.OrigemErro, mensagem.TentativasRealizadas);
+            else
+                metrics.RegistrarFalhaProcessamentoRecebida(mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.OrigemErro, mensagem.TentativasRealizadas);
 
             logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogWarning($"Falha registrada para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. {LogNomesPropriedades.Motivo}: {{{LogNomesPropriedades.Motivo}}}. {LogNomesPropriedades.Tentativas}: {{{LogNomesPropriedades.Tentativas}}}", mensagem.AnaliseDiagramaId, mensagem.Motivo, mensagem.TentativasRealizadas);
         }
