@@ -1,5 +1,6 @@
 using Application.Contracts.Messaging.Dtos;
 using Application.Extensions;
+using Domain.ResultadoDiagrama.Enums;
 using Infrastructure.Database;
 using Infrastructure.Monitoramento;
 using Infrastructure.Repositories;
@@ -35,6 +36,14 @@ public class UploadDiagramaConcluidoConsumer : IConsumer<UploadDiagramaConcluido
             var resultadoDiagrama = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
             if (resultadoDiagrama != null)
             {
+                if (resultadoDiagrama.Status.Valor == StatusAnaliseEnum.Erro)
+                {
+                    logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogInformation($"Retry detectado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. Preparando para reprocessamento.", mensagem.AnaliseDiagramaId);
+                    resultadoDiagrama.PrepararParaReprocessamento();
+                    await gateway.SalvarAsync(resultadoDiagrama);
+                    return;
+                }
+
                 logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogDebug("Resultado de diagrama já existe, ignorando mensagem de upload concluído");
                 return;
             }

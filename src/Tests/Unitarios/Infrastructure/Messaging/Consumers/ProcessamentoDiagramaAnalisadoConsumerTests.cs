@@ -55,4 +55,26 @@ public class ProcessamentoDiagramaAnalisadoConsumerTests
         // Act & Assert
         await Should.ThrowAsync<Exception>(() => consumer.Consume(contexto.Object));
     }
+
+    [Fact(DisplayName = "Deve reprocessar e registrar análise quando status for Erro (retry)")]
+    [Trait("Infrastructure", "ProcessamentoDiagramaAnalisadoConsumer")]
+    public async Task Consume_DeveReprocessarERegistrarAnalise_QuandoStatusErro()
+    {
+        // Arrange
+        var analiseDiagramaId = Guid.NewGuid();
+        using var fixture = new ResultadoDiagramaConsumerTestFixture()
+            .ComResultadoDiagrama(new ResultadoDiagramaBuilder().ComAnaliseDiagramaId(analiseDiagramaId).ComFalhaProcessamento().Build());
+        var consumer = fixture.CriarConsumerAnalisado();
+        var mensagem = new ProcessamentoDiagramaAnalisadoDtoBuilder().ComAnaliseDiagramaId(analiseDiagramaId).ComDescricaoAnalise("Nova análise após retry").Build();
+        var contexto = ResultadoDiagramaConsumerTestFixture.CriarContextoAnalisado(mensagem, Guid.NewGuid());
+
+        // Act
+        await consumer.Consume(contexto.Object);
+        var resultado = await fixture.Contexto.ResultadosDiagrama.FirstAsync(item => item.AnaliseDiagramaId == analiseDiagramaId);
+
+        // Assert
+        resultado.DeveEstarAnalisadoComDescricao("Nova análise após retry");
+        resultado.Erros.ShouldNotBeEmpty();
+        fixture.DeveTerPublicadoSolicitacaoGeracao(analiseDiagramaId);
+    }
 }

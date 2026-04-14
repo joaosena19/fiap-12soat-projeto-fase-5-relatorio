@@ -1,5 +1,6 @@
 using Application.Contracts.Messaging.Dtos;
 using Application.Extensions;
+using Domain.ResultadoDiagrama.Enums;
 using Infrastructure.Database;
 using Infrastructure.Monitoramento;
 using Infrastructure.Repositories;
@@ -41,7 +42,14 @@ public class ProcessamentoDiagramaIniciadoConsumer : IConsumer<ProcessamentoDiag
             var resultadoExistente = await gateway.ObterPorAnaliseDiagramaIdAsync(mensagem.AnaliseDiagramaId);
 
             var resultadoDiagrama = resultadoExistente ?? Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama.Criar(mensagem.AnaliseDiagramaId);
-            resultadoDiagrama.MarcarEmProcessamento();
+
+            if (resultadoDiagrama.Status.Valor == StatusAnaliseEnum.Erro)
+            {
+                logger.ComConsumoMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, mensagem.AnaliseDiagramaId).LogInformation($"Retry detectado para {{{LogNomesPropriedades.AnaliseDiagramaId}}}. Preparando para reprocessamento.", mensagem.AnaliseDiagramaId);
+                resultadoDiagrama.PrepararParaReprocessamento();
+            }
+            else
+                resultadoDiagrama.MarcarEmProcessamento();
 
             try
             {
