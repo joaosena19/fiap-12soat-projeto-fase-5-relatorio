@@ -1,4 +1,5 @@
 using DataCriacaoResultadoDiagrama = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.DataCriacao;
+using DataUltimaTentativaResultadoDiagrama = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.DataUltimaTentativa;
 using StatusResultadoDiagrama = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.Status;
 using ConteudosRelatorio = Domain.ResultadoDiagrama.ValueObjects.RelatorioGerado.Conteudos;
 using Domain.ResultadoDiagrama.Entities;
@@ -19,11 +20,14 @@ public class ResultadoDiagrama
     public List<RelatorioGerado> Relatorios { get; private set; } = new();
     public List<ErroResultadoDiagrama> Erros { get; private set; } = new();
     public DataCriacaoResultadoDiagrama DataCriacao { get; private set; } = null!;
+    public DataUltimaTentativaResultadoDiagrama DataUltimaTentativa { get; private set; } = null!;
 
     private ResultadoDiagrama() { }
 
     public static ResultadoDiagrama Criar(Guid analiseDiagramaId)
     {
+        var agora = DateTimeOffset.UtcNow;
+
         return new ResultadoDiagrama
         {
             Id = Uuid.NewDatabaseFriendly(Database.PostgreSql),
@@ -32,7 +36,8 @@ public class ResultadoDiagrama
             AnaliseResultado = null,
             Relatorios = CriarRelatoriosPadrao(),
             Erros = new List<ErroResultadoDiagrama>(),
-            DataCriacao = new DataCriacaoResultadoDiagrama(DateTimeOffset.UtcNow)
+            DataCriacao = new DataCriacaoResultadoDiagrama(agora),
+            DataUltimaTentativa = new DataUltimaTentativaResultadoDiagrama(agora)
         };
     }
 
@@ -103,6 +108,7 @@ public class ResultadoDiagrama
         AnaliseResultado = null;
         Relatorios = CriarRelatoriosPadrao();
         Status = new StatusResultadoDiagrama(StatusAnaliseEnum.EmProcessamento);
+        DataUltimaTentativa = new DataUltimaTentativaResultadoDiagrama(DateTimeOffset.UtcNow);
     }
 
     public RelatorioGerado ObterRelatorio(TipoRelatorioEnum tipoRelatorio)

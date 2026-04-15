@@ -4,6 +4,7 @@ using Domain.ResultadoDiagrama.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ResultadoDiagramaDataCriacao = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.DataCriacao;
+using ResultadoDiagramaDataUltimaTentativa = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.DataUltimaTentativa;
 using ResultadoDiagramaStatus = Domain.ResultadoDiagrama.ValueObjects.ResultadoDiagrama.Status;
 
 namespace Infrastructure.Database.Configurations;
@@ -43,6 +44,13 @@ public class ResultadoDiagramaConfiguration : IEntityTypeConfiguration<Resultado
                .HasConversion(
                    value => value.Valor,
                    value => new ResultadoDiagramaDataCriacao(value));
+
+        builder.Property(a => a.DataUltimaTentativa)
+               .HasColumnName("data_ultima_tentativa")
+               .IsRequired()
+               .HasConversion(
+                   value => value.Valor,
+                   value => new ResultadoDiagramaDataUltimaTentativa(value));
 
         builder.Property(a => a.Status)
                .HasColumnName("status_analise")

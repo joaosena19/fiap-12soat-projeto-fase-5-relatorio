@@ -201,12 +201,7 @@ public class ResultadoDiagramaAggregateTests
         resultado.PrepararParaReprocessamento();
 
         // Assert
-        resultado.Status.Valor.ShouldBe(StatusAnaliseEnum.EmProcessamento);
-        resultado.AnaliseResultado.ShouldBeNull();
-        resultado.Relatorios.Count.ShouldBe(Enum.GetValues<TipoRelatorioEnum>().Length);
-        resultado.Relatorios.First(r => r.Tipo.Valor == TipoRelatorioEnum.Json).Status.Valor.ShouldBe(StatusRelatorioEnum.Automatico);
-        resultado.Relatorios.Where(r => r.Tipo.Valor != TipoRelatorioEnum.Json).All(r => r.Status.Valor == StatusRelatorioEnum.NaoSolicitado).ShouldBeTrue();
-        resultado.Erros.ShouldNotBeEmpty();
+        resultado.DeveEstarPreparadoParaReprocessamento();
     }
 
     [Fact(DisplayName = "Não deve preparar para reprocessamento quando status não é Erro")]
@@ -246,6 +241,65 @@ public class ResultadoDiagramaAggregateTests
 
         // Assert
         resultado.Erros.Count.ShouldBe(quantidadeErrosAntes);
+    }
+
+    #endregion
+
+    #region DataUltimaTentativa
+
+    [Fact(DisplayName = "Deve inicializar DataUltimaTentativa igual a DataCriacao ao criar")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void Criar_DeveInicializarDataUltimaTentativaIgualDataCriacao_QuandoCriado()
+    {
+        // Act
+        var resultado = ResultadoDiagramaAggregate.Criar(Guid.NewGuid());
+
+        // Assert
+        resultado.DataUltimaTentativa.Valor.ShouldBe(resultado.DataCriacao.Valor);
+    }
+
+    [Fact(DisplayName = "Deve atualizar DataUltimaTentativa ao preparar para reprocessamento")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DeveAtualizarDataUltimaTentativa_QuandoStatusErro()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().ComFalhaProcessamento().Build();
+        var dataUltimaTentativaAnterior = resultado.DataUltimaTentativa.Valor;
+
+        // Act
+        resultado.PrepararParaReprocessamento();
+
+        // Assert
+        resultado.DataUltimaTentativa.Valor.ShouldBeGreaterThan(dataUltimaTentativaAnterior);
+    }
+
+    [Fact(DisplayName = "Deve manter DataCriacao inalterada ao preparar para reprocessamento")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DeveManterDataCriacao_QuandoStatusErro()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().ComFalhaProcessamento().Build();
+        var dataCriacaoOriginal = resultado.DataCriacao.Valor;
+
+        // Act
+        resultado.PrepararParaReprocessamento();
+
+        // Assert
+        resultado.DataCriacao.Valor.ShouldBe(dataCriacaoOriginal);
+    }
+
+    [Fact(DisplayName = "DataUltimaTentativa deve ser maior que DataCriacao após reprocessamento")]
+    [Trait("Aggregate", "ResultadoDiagrama")]
+    public void PrepararParaReprocessamento_DataUltimaTentativaDeveSuperarDataCriacao_QuandoReprocessado()
+    {
+        // Arrange
+        var resultado = new ResultadoDiagramaBuilder().ComFalhaProcessamento().Build();
+
+        // Act
+        resultado.PrepararParaReprocessamento();
+
+        // Assert
+        resultado.DataUltimaTentativa.Valor.ShouldBeGreaterThan(resultado.DataCriacao.Valor);
     }
 
     #endregion

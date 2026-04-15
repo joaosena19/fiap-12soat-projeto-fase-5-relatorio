@@ -24,7 +24,8 @@ public class ListarResultadosDiagramaPresenter : BasePresenter, IListarResultado
                 .Select(r => r.Tipo.Valor.ToString())
                 .ToList(),
             QuantidadeErros = resultado.Erros.Count,
-            DataCriacao = resultado.DataCriacao.Valor
+            DataCriacao = resultado.DataCriacao.Valor,
+            DataUltimaTentativa = resultado.DataUltimaTentativa.Valor
         };
     }
 }
