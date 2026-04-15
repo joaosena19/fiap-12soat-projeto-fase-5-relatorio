@@ -35,7 +35,7 @@ public class ResultadoDiagramaRepository : IResultadoDiagramaGateway
     public async Task<IReadOnlyCollection<Domain.ResultadoDiagrama.Aggregates.ResultadoDiagrama>> ListarAsync()
     {
         return await _context.ResultadosDiagrama
-            .OrderByDescending(r => r.DataCriacao)
+            .OrderByDescending(r => r.DataUltimaTentativa)
             .ToListAsync();
     }
 }

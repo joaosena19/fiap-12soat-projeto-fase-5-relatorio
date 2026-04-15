@@ -27,7 +27,8 @@ public class BuscarResultadoDiagramaPresenter : BasePresenter, IBuscarResultadoD
                 NumeroTentativa = erro.NumeroTentativa.Valor,
                 DataOcorrencia = erro.DataOcorrencia.Valor
             }).ToList(),
-            DataCriacao = resultadoDiagrama.DataCriacao.Valor
+            DataCriacao = resultadoDiagrama.DataCriacao.Valor,
+            DataUltimaTentativa = resultadoDiagrama.DataUltimaTentativa.Valor
         };
 
         DefinirSucesso(dto);

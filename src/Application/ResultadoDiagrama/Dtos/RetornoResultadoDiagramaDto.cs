@@ -9,4 +9,5 @@ public class RetornoResultadoDiagramaDto
     public List<RelatorioDto> Relatorios { get; set; } = new();
     public List<ErroResultadoDiagramaDto> Erros { get; set; } = new();
     public DateTimeOffset DataCriacao { get; set; }
+    public DateTimeOffset DataUltimaTentativa { get; set; }
 }
