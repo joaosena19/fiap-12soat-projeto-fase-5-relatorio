@@ -25,16 +25,23 @@ public class RelatorioMessagePublisher : IRelatorioMessagePublisher
 
     public async Task PublicarSolicitacaoGeracaoAsync(Guid analiseDiagramaId, IReadOnlyCollection<TipoRelatorioEnum> tiposRelatorio)
     {
-        _logger.ComEnvioMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId).ComPropriedade(LogNomesPropriedades.QuantidadeTipos, tiposRelatorio.Count).LogInformation($"Publicando solicitação de geração de relatórios para {{{LogNomesPropriedades.AnaliseDiagramaId}}} com {{{LogNomesPropriedades.QuantidadeTipos}}} tipo(s)", analiseDiagramaId, tiposRelatorio.Count);
-
-        await _publishEndpoint.Publish(new SolicitarGeracaoRelatoriosDto
+        var mensagem = new SolicitarGeracaoRelatoriosDto
         {
+            CorrelationId = _correlationIdAccessor.GetCorrelationId(),
             AnaliseDiagramaId = analiseDiagramaId,
             TiposRelatorio = tiposRelatorio.ToList()
-        }, context =>
+        };
+
+        _logger.ComEnvioMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId).ComPropriedade(LogNomesPropriedades.QuantidadeTipos, tiposRelatorio.Count).LogInformation($"Publicando solicitação de geração de relatórios para {{{LogNomesPropriedades.AnaliseDiagramaId}}} com {{{LogNomesPropriedades.QuantidadeTipos}}} tipo(s)", analiseDiagramaId, tiposRelatorio.Count);
+
+        try
         {
-            if (Guid.TryParse(_correlationIdAccessor.GetCorrelationId(), out var correlationId))
-                context.CorrelationId = correlationId;
-        });
+            await _publishEndpoint.Publish(mensagem);
+        }
+        catch (Exception ex)
+        {
+            _logger.ComEnvioMensagem(this).ComPropriedade(LogNomesPropriedades.AnaliseDiagramaId, analiseDiagramaId).LogError(ex, $"Falha ao publicar solicitação de geração de relatórios para {{{LogNomesPropriedades.AnaliseDiagramaId}}}", analiseDiagramaId);
+            throw;
+        }
     }
 }
